@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Forum - Comment</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <div class="post">
+        <h1>{{.Post.Name}}: {{.Post.Title}}</h1>
+        <p>{{.Post.Content}}</p><br>
+    </div>
+    <div class="form-container">
+        <form class="myfrom" action="/Commenting" method="post">
+            <h1>Comment</h1>
+            <textarea name="Content" placeholder="Content" required></textarea>
+            <input type="hidden" name="title" value="{{.Post.Title}}">
+            <input class="input" type="submit" class="btn" value="Comment">
+        </form>
+    </div>
+    {{range .COMMENT}}
+    <div  class="Comment">
+        <h1 class="titlecomment">{{.Uname}}</h1>
+        <p class="titlecomment">{{.Content}}</p>
+    </div>
+    {{end}}
+</body>
+
+</html>

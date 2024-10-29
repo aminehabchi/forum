@@ -1,0 +1,238 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background-color: #1e1f29;
+    color: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #1e1f29;
+    border: none;
+    color: #fff;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 1001;
+    display: none; /* Hide by default, show on small screens */
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.filter-form label {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.filter-form select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-group label {
+    display: inline-block;
+    background-color: #3a3b47;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+}
+
+.checkbox-group label i {
+    margin-right: 10px;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label {
+    background-color: #e9b949;
+    color: #fff;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label:hover {
+    background-color: #d89d3b;
+}
+
+.checkbox-group label:hover {
+    background-color: #4a4b58;
+}
+
+.apply-btn {
+    background-color: #e9b949;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.apply-btn:hover {
+    background-color: #d89d3b;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    background-color: #f8f9fa;
+    margin-left: 260px;
+    transition: margin-left 0.3s ease;
+}
+
+.head {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.headform .btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.headform .btn:hover {
+    background-color: #0056b3;
+}
+
+/* Post Styles */
+.Posts {
+    display: grid;
+    gap: 20px;
+}
+
+.post {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow:auto;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.title {
+    font-size: 20px;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.category {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.content {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.post-actions {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.action-btn:hover {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 80%;
+        max-width: 300px;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        display: block; /* Show the toggle button on small screens */
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .sidebar-toggle.hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .Posts {
+        grid-template-columns: 1fr;
+    }
+
+    .action-btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
