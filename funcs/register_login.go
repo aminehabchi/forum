@@ -30,6 +30,8 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	err := setLoginTime(0, uname.Value)
 	if err != nil {
 		fmt.Println(err)
+		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+		return
 	}
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
@@ -50,11 +52,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterIngo(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
 	_, err := r.Cookie("username")
 	if err != http.ErrNoCookie {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
@@ -109,11 +106,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginInfo(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
 	_, err := r.Cookie("username")
 	if err != http.ErrNoCookie {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)

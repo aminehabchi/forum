@@ -9,6 +9,15 @@ import (
 	"strings"
 )
 
+type COMMENT struct {
+	Id       int
+	Uname    string
+	Content  string
+	Postid   int
+	Likes    int
+	Dislikes int
+}
+
 func Commenting(w http.ResponseWriter, r *http.Request) {
 	a := r.FormValue("post_id")
 	id, _ := strconv.Atoi(r.FormValue("post_id"))
@@ -24,7 +33,11 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// post, _ := getPost(id)
-	Comments := GetComment(id)
+	Comments, err := GetComment(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	temp, _ := template.ParseFiles("templates/comment.html")
 	type data struct {
 		Post    POST
@@ -35,10 +48,26 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 }
 
 func Comment(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.Atoi(r.FormValue("post_id"))
-	post, _ := getPost(id)
-	Comments := GetComment(id)
-	temp, _ := template.ParseFiles("templates/comment.html")
+	id, err := strconv.Atoi(r.FormValue("post_id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	post, err := getPost(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	Comments, err := GetComment(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	temp, err := template.ParseFiles("templates/comment.html")
+	if err != nil {
+		http.Error(w, "Could not load template", http.StatusInternalServerError)
+		return
+	}
 	type data struct {
 		Post    POST
 		COMMENT []COMMENT
@@ -57,19 +86,11 @@ func insertComment(postid int, uname, content string) error {
 	return nil
 }
 
-type COMMENT struct {
-	Id       int
-	Uname    string
-	Content  string
-	Postid   int
-	Likes    int
-	Dislikes int
-}
-
-func GetComment(id int) []COMMENT {
+func GetComment(id int) ([]COMMENT, error) {
 	rows, err := db.Query("SELECT id,post_id, uname, content FROM comments WHERE post_id = ?", id)
 	if err != nil {
-		log.Fatal(err, "  99999")
+		log.Fatal(err, "99999")
+		return []COMMENT{}, err
 	}
 	defer rows.Close()
 
@@ -77,11 +98,12 @@ func GetComment(id int) []COMMENT {
 	for rows.Next() {
 		var content, uname string
 		var id, pid int
-		err := rows.Scan(&id,&pid, &uname, &content)
+		err := rows.Scan(&id, &pid, &uname, &content)
 		if err != nil {
 			log.Fatal(err, "err2")
+			return []COMMENT{}, err
 		}
-		comment := COMMENT{Id: id,Postid: pid, Uname: uname, Content: content}
+		comment := COMMENT{Id: id, Postid: pid, Uname: uname, Content: content}
 		comment.Likes = getLikeDisLike("comment", id, 1)
 
 		comment.Dislikes = getLikeDisLike("comment", id, -1)
@@ -91,8 +113,9 @@ func GetComment(id int) []COMMENT {
 	// Check for any errors during the iteration
 	if err = rows.Err(); err != nil {
 		log.Fatal(err, "err1")
+		return []COMMENT{}, err
 	}
-	return comments
+	return comments, nil
 }
 
 func getPost(id int) (POST, error) {

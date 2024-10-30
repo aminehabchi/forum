@@ -36,7 +36,7 @@ func filterPosts(category, created, liked string, r *http.Request) []POST {
 	}
 	user, _ := r.Cookie("username")
 	for _, post := range posts {
-		if category != "" && !elementExists(post.Category, category) {
+		if category != "" && !ElementExists(category) {
 			continue
 		}
 
@@ -58,7 +58,8 @@ func filterPosts(category, created, liked string, r *http.Request) []POST {
 	return filteredPosts
 }
 
-func elementExists(arr []string, elem string) bool {
+func ElementExists(elem string) bool {
+	arr := []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"}
     for _, v := range arr {
         if v == elem {
             return true
