@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 )
 
 type USER struct {
@@ -24,11 +25,16 @@ type POST struct {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
+	uname, _ := r.Cookie("username")
 	cookie := http.Cookie{
 		Name:   "username",
 		MaxAge: -1,
 	}
 	http.SetCookie(w, &cookie)
+	err := setLoginTime(0, uname.Value)
+	if err != nil {
+		fmt.Println(err)
+	}
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
@@ -77,11 +83,33 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 				// timeeeee
 			}
 			http.SetCookie(w, &cookie)
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
+			err = setLoginTime(1, uname)
+			if err != nil {
+				temp.Execute(w, "already user is login")
+			}else{
+				http.Redirect(w, r, "/home", http.StatusSeeOther)
+			}
 		} else if err == nil || c.Value != uname {
 			temp.Execute(w, "already user is login")
 		}
 	}
+}
+
+func setLoginTime(bl int, uname string) error {
+	isActive := 0
+	query1 := `SELECT is_active FROM users WHERE uname=?`
+	db.QueryRow(query1, uname).Scan(&isActive)
+
+	if bl == 1 && isActive == 1 {
+		return errors.New("already login")
+	}
+	currentTime := time.Now()
+	query := "UPDATE users SET is_active=?, loginTime=? WHERE uname=?"
+	_, err := db.Exec(query, bl, currentTime.Format("2006-01-02 15:04:05"), uname)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func checkInfo(email_uname string) (string, string, string, error) {

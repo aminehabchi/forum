@@ -19,6 +19,8 @@ func Createbase() error {
     CREATE TABLE IF NOT EXISTS users (
         password TEXT NOT NULL ,
         uname TEXT NOT NULL UNIQUE,
+		is_active INTEGER DEFAULT 0,
+		loginTime TEXT,
         email TEXT NOT NULL UNIQUE
     );
 	CREATE TABLE IF NOT EXISTS comments (
