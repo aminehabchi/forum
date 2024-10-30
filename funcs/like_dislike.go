@@ -22,16 +22,17 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	postID := r.FormValue("post_id")
 	action := r.FormValue("action")
 	types := r.FormValue("type")
+	commentid := r.FormValue("commentid")
 	if (types != "post" && types != "comment") || (action != "dislike" && action != "like") {
 		// badrequest
 	}
-	addInteractions(username, postID, action, types)
+	addInteractions(username, commentid, action, types)
 
 	if types == "post" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
-		
-		http.Redirect(w, r, "//Comment?pastName={{.Title}}", http.StatusSeeOther)
+		link := fmt.Sprintf("/Comment?post_id=%v", postID)
+		http.Redirect(w, r, link, http.StatusSeeOther)
 	}
 }
 

@@ -23,7 +23,7 @@ func Createbase() error {
     );
 	CREATE TABLE IF NOT EXISTS comments (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-        postTitle TEXT NOT NULL ,
+        post_id INTEGER NOT NULL ,
         uname TEXT NOT NULL ,
         content TEXT NOT NULL
     );

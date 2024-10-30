@@ -10,13 +10,15 @@ import (
 )
 
 func Commenting(w http.ResponseWriter, r *http.Request) {
+	a := r.FormValue("post_id")
 	id, _ := strconv.Atoi(r.FormValue("post_id"))
 	content := r.FormValue("Content")
 	c, _ := r.Cookie("username")
 	uname := c.Value
+	fmt.Println(id, a, content, c)
 	post, _ := getPost(id)
-	
-	err := insertComment(post.Title, uname, content)
+
+	err := insertComment(id, uname, content)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -41,13 +43,14 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		Post    POST
 		COMMENT []COMMENT
 	}
+	fmt.Println(post.ID)
 	ff := data{Post: post, COMMENT: Comments}
 	temp.Execute(w, ff)
 }
 
-func insertComment(title, uname, content string) error {
-	selector := `INSERT INTO comments(postTitle,uname,content) VALUES (?,?,?)`
-	_, err := db.Exec(selector, title, uname, content)
+func insertComment(postid int, uname, content string) error {
+	selector := `INSERT INTO comments(post_id,uname,content) VALUES (?,?,?)`
+	_, err := db.Exec(selector, postid, uname, content)
 	if err != nil {
 		return err
 	}
@@ -58,12 +61,13 @@ type COMMENT struct {
 	Id       int
 	Uname    string
 	Content  string
+	Postid   int
 	Likes    int
 	Dislikes int
 }
 
 func GetComment(id int) []COMMENT {
-	rows, err := db.Query("SELECT id, uname, content FROM comments WHERE id = ?", id)
+	rows, err := db.Query("SELECT id,post_id, uname, content FROM comments WHERE post_id = ?", id)
 	if err != nil {
 		log.Fatal(err, "  99999")
 	}
@@ -72,13 +76,14 @@ func GetComment(id int) []COMMENT {
 	var comments []COMMENT
 	for rows.Next() {
 		var content, uname string
-		var id int
-		err := rows.Scan(&id, &uname, &content)
+		var id, pid int
+		err := rows.Scan(&id,&pid, &uname, &content)
 		if err != nil {
 			log.Fatal(err, "err2")
 		}
-		comment := COMMENT{Id: id, Uname: uname, Content: content}
+		comment := COMMENT{Id: id,Postid: pid, Uname: uname, Content: content}
 		comment.Likes = getLikeDisLike("comment", id, 1)
+
 		comment.Dislikes = getLikeDisLike("comment", id, -1)
 		comments = append(comments, comment)
 	}
@@ -91,10 +96,10 @@ func GetComment(id int) []COMMENT {
 }
 
 func getPost(id int) (POST, error) {
-	query := `SELECT uname, title, content, category FROM posts WHERE id = ?`
+	query := `SELECT id,uname, title, content, category FROM posts WHERE id = ?`
 	var post POST
 	var str string
-	err := db.QueryRow(query, id).Scan(&post.Name,&post.Title ,&post.Content, &str )
+	err := db.QueryRow(query, id).Scan(&post.ID, &post.Name, &post.Title, &post.Content, &str)
 	if err != nil {
 		return POST{}, err
 	}
