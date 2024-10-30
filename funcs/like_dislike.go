@@ -7,7 +7,7 @@ import (
 
 func IsPostLikedByUser(postID int, name string) bool {
 	var existingInteraction int
-	db.QueryRow("SELECT interaction FROM interactions WHERE username = ? AND post_id = ?", name, postID).Scan(&existingInteraction)
+	db.QueryRow("SELECT interaction FROM interactions WHERE type = ? AND username = ? AND post_id = ?", "post",name, postID).Scan(&existingInteraction)
 	return existingInteraction == 1
 }
 
