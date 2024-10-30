@@ -35,6 +35,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
+	_, err := r.Cookie("username")
+	if err != http.ErrNoCookie {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+		return
+	}
+
 	temp, err := template.ParseFiles("templates/register.html")
 	if err != nil {
 		http.Error(w, "Could not load template", http.StatusInternalServerError)
@@ -46,6 +52,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func RegisterIngo(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	_, err := r.Cookie("username")
+	if err != http.ErrNoCookie {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 
@@ -119,7 +131,7 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 
 	_, uname, correctPassword, err := GetUserInfoByLoginInfo(email)
 	if err != nil {
-		temp.Execute(w, "can t find user")
+		temp.Execute(w, "email not found")
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(correctPassword), []byte(password)); err != nil {
