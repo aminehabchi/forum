@@ -42,7 +42,6 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 
 	if !CategoryFilter(category) {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("xxxxx")
 		temp.Execute(w, "Invalid categorie, Please write valid catgerie")
 		return
 	}
@@ -67,8 +66,9 @@ func insertPost(uname, title, content, category string) error {
 }
 
 func CategoryFilter(categories []string) bool {
+	allCategories := []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"}
 	for _, v := range categories {
-		if !ElementExists(v) {
+		if !ElementExists(allCategories, v) {
 			return false
 		}
 	}

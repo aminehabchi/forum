@@ -7,15 +7,11 @@ import (
 
 func IsPostLikedByUser(postID int, name string) bool {
 	var existingInteraction int
-	db.QueryRow("SELECT interaction FROM interactions WHERE type = ? AND username = ? AND post_id = ?", "post",name, postID).Scan(&existingInteraction)
+	db.QueryRow("SELECT interaction FROM interactions WHERE type = ? AND username = ? AND post_id = ?", "post", name, postID).Scan(&existingInteraction)
 	return existingInteraction == 1
 }
 
 func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	c, _ := r.Cookie("username")
 
 	username := c.Value
@@ -24,8 +20,10 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	types := r.FormValue("type")
 	commentid := r.FormValue("commentid")
 	if (types != "post" && types != "comment") || (action != "dislike" && action != "like") {
-		// badrequest
+		http.Error(w, "invalid Type or Action", http.StatusBadRequest)
+		return
 	}
+
 	addInteractions(username, commentid, action, types)
 
 	if types == "post" {

@@ -10,6 +10,7 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	category := r.FormValue("category")
 	created := r.FormValue("created")
 	liked := r.FormValue("liked")
+
 	filteredPosts := filterPosts(category, created, liked, r)
 
 	_, err := r.Cookie("username")
@@ -33,10 +34,11 @@ func filterPosts(category, created, liked string, r *http.Request) []POST {
 	posts, e := GetPosts()
 	if e != nil {
 		fmt.Println(e)
+		return []POST{}
 	}
 	user, _ := r.Cookie("username")
 	for _, post := range posts {
-		if category != "" && !ElementExists(category) {
+		if category != "" && !ElementExists(post.Category, category) {
 			continue
 		}
 
@@ -58,12 +60,11 @@ func filterPosts(category, created, liked string, r *http.Request) []POST {
 	return filteredPosts
 }
 
-func ElementExists(elem string) bool {
-	arr := []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"}
-    for _, v := range arr {
-        if v == elem {
-            return true
-        }
-    }
-    return false
+func ElementExists(arr []string, elem string) bool {
+	for _, v := range arr {
+		if v == elem {
+			return true
+		}
+	}
+	return false
 }
