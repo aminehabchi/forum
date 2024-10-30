@@ -1,32 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/styles.css" />
     <title>Forum - Register</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="form-container">
-        
-        <form class="myfrom" method="post" action="registerIngo">
-            <h1>Register</h1>
-            <h2>{{.}}</h2> 
-            <label for="email">Email</label>
-            <input class="input" type="text" name="email" placeholder="Enter your email" required><br>
+      <form class="myfrom" method="post" action="registerIngo">
+        <h1>Register</h1>
+        <h2>{{.}}</h2>
+        <label for="email">Email</label>
+        <input
+          class="input"
+          type="email"
+          name="email"
+          placeholder="Enter your email"
+          required
+        /><br />
 
-            <label for="uname">Username</label>
-            <input class="input" type="text" name="uname" placeholder="Choose a username" required><br>
+        <label for="uname">Username</label>
+        <input
+          class="input"
+          type="text"
+          name="uname"
+          placeholder="Choose a username"
+          required
+        /><br />
 
-            <label for="password">Password</label>
-            <input class="input"  type="password" name="password" placeholder="Create a password" required><br>
+        <label for="password">Password</label>
+        <input
+          class="input"
+          type="password"
+          name="password"
+          placeholder="Create a password"
+          required
+        /><br />
 
-            <input class="input" type="submit" name="register" value="Register">
-        </form>
-        <p>Already have an account? <a href="/login">Sign in →</a></p>
+        <input class="input" type="submit" name="register" value="Register" />
+      </form>
+      <p>Already have an account? <a href="/login">Sign in →</a></p>
     </div>
-</body>
-
+  </body>
 </html>

@@ -1,19 +1,27 @@
 package forum
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	temp, _ := template.ParseFiles("templates/home.html")
-	posts, e := GetPosts()
-	if e != nil {
-		fmt.Println(e)
+	temp, err := template.ParseFiles("templates/home.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Println("Template parsing error:", err)
+		return
 	}
 
-	_, err := r.Cookie("username")
+	posts, err := GetPosts()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Println("Error getting posts:", err)
+		return
+	}
+
+	_, err = r.Cookie("username")
 	isLoggedIn := err == nil
 
 	data := struct {
@@ -26,5 +34,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
 	}
 
-	temp.Execute(w, data)
+	err = temp.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Println("Template execution error:", err)
+	}
 }

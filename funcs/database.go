@@ -20,7 +20,6 @@ func Createbase() error {
         password TEXT NOT NULL ,
         uname TEXT NOT NULL UNIQUE,
 		is_active INTEGER DEFAULT 0,
-		loginTime TEXT,
         email TEXT NOT NULL UNIQUE
     );
 	CREATE TABLE IF NOT EXISTS comments (
@@ -30,17 +29,17 @@ func Createbase() error {
         content TEXT NOT NULL
     );
 	CREATE TABLE IF NOT EXISTS posts (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			uname TEXT,
-			title TEXT,
-			content TEXT,
-			category TEXT
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		uname TEXT,
+		title TEXT,
+		content TEXT,
+		category TEXT
 	);
 	CREATE TABLE IF NOT EXISTS interactions (
-			username TEXT,
-			post_id INTEGER,
-			type TEXT,
-			interaction INTEGER
+		username TEXT,
+		post_id INTEGER,
+		type TEXT,
+		interaction INTEGER
 	);`
 	_, err = db.Exec(createTableSQL)
 	if err != nil {

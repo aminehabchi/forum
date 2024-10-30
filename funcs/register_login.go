@@ -6,13 +6,9 @@ import (
 	"html/template"
 	"net/http"
 	"time"
-)
 
-type USER struct {
-	Unknown bool
-	Uname   string
-	Message string
-}
+	"golang.org/x/crypto/bcrypt"
+)
 
 type POST struct {
 	ID       int
@@ -39,21 +35,46 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	temp, _ := template.ParseFiles("templates/register.html")
+	temp, err := template.ParseFiles("templates/register.html")
+	if err != nil {
+		http.Error(w, "Could not load template", http.StatusInternalServerError)
+		return
+	}
 	temp.Execute(w, nil)
 }
 
 func RegisterIngo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
 	email := r.FormValue("email")
 	uname := r.FormValue("uname")
 	password := r.FormValue("password")
-	if email == "" || uname == "" || password == "" {
-		// badrequest
+
+	temp, err := template.ParseFiles("templates/register.html")
+	if err != nil {
+		http.Error(w, "Could not load template", http.StatusInternalServerError)
+		return
 	}
-	err := InsertUserInfo(email, password, uname)
+
+	if email == "" || uname == "" || password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		temp.Execute(w, "Invalid Inputs, Please fill all inputs")
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Could not hash password", http.StatusInternalServerError)
+		return
+	}
+
+	err = InsertUserInfo(email, string(hashedPassword), uname)
 	if err != nil {
 		fmt.Println(err)
-		temp, _ := template.ParseFiles("register.html")
+		w.WriteHeader(http.StatusConflict)
 		temp.Execute(w, "user name or email already used")
 	} else {
 		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
@@ -61,77 +82,95 @@ func RegisterIngo(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	temp, _ := template.ParseFiles("templates/login.html")
+	_, err := r.Cookie("username")
+	if err != http.ErrNoCookie {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+		return
+	}
+
+	temp, err := template.ParseFiles("templates/login.html")
+	if err != nil {
+		http.Error(w, "Could not load template", http.StatusInternalServerError)
+		return
+	}
 	temp.Execute(w, nil)
 }
 
 func LoginInfo(w http.ResponseWriter, r *http.Request) {
-	temp, _ := template.ParseFiles("templates/login.html")
-	email_uname := r.FormValue("email")
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	_, err := r.Cookie("username")
+	if err != http.ErrNoCookie {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+		return
+	}
+
+	temp, err := template.ParseFiles("templates/login.html")
+	if err != nil {
+		http.Error(w, "Could not load template", http.StatusInternalServerError)
+		return
+	}
+
+	email := r.FormValue("email")
 	password := r.FormValue("password")
-	_, uname, correctPassword, err := checkInfo(email_uname)
+
+	_, uname, correctPassword, err := GetUserInfoByLoginInfo(email)
 	if err != nil {
 		temp.Execute(w, "can t find user")
-	} else if correctPassword != password {
-		temp.Execute(w, "password incorrect")
-	} else {
-		c, err := r.Cookie("username")
-		if err != nil || (err == nil && c.Value == uname) {
-			cookie := http.Cookie{
-				Name:  "username",
-				Value: uname,
-				// timeeeee
-			}
-			http.SetCookie(w, &cookie)
-			err = setLoginTime(1, uname)
-			if err != nil {
-				temp.Execute(w, "already user is login")
-			}else{
-				http.Redirect(w, r, "/home", http.StatusSeeOther)
-			}
-		} else if err == nil || c.Value != uname {
-			temp.Execute(w, "already user is login")
-		}
+		return
 	}
+	if err := bcrypt.CompareHashAndPassword([]byte(correctPassword), []byte(password)); err != nil {
+		temp.Execute(w, "password incorrect")
+		return
+	}
+
+	if err := setLoginTime(1, uname); err != nil {
+		temp.Execute(w, "already user is login")
+		return
+	}
+
+	newCookie := http.Cookie{
+		Name:     "username",
+		Value:    uname,
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+	}
+	http.SetCookie(w, &newCookie)
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
 
 func setLoginTime(bl int, uname string) error {
 	isActive := 0
 	query1 := `SELECT is_active FROM users WHERE uname=?`
-	db.QueryRow(query1, uname).Scan(&isActive)
-
+	err := db.QueryRow(query1, uname).Scan(&isActive)
+	if err != nil {
+		fmt.Println("select is_active err", err)
+		return err
+	}
 	if bl == 1 && isActive == 1 {
+		fmt.Println("xx")
 		return errors.New("already login")
 	}
-	currentTime := time.Now()
-	query := "UPDATE users SET is_active=?, loginTime=? WHERE uname=?"
-	_, err := db.Exec(query, bl, currentTime.Format("2006-01-02 15:04:05"), uname)
+	query := "UPDATE users SET is_active=? WHERE uname=?"
+	_, err = db.Exec(query, bl, uname)
 	if err != nil {
+		fmt.Println("err update", err)
 		return err
 	}
 	return nil
 }
 
-func checkInfo(email_uname string) (string, string, string, error) {
-	email, uname, correctPassword, err := GetUserInfoByLoginInfo(email_uname)
-	if err != nil {
-		return "", "", "", err
-	}
-	return email, uname, correctPassword, nil
-}
-
 func GetUserInfoByLoginInfo(email_users string) (string, string, string, error) {
-	query := `SELECT email, password FROM users WHERE uname = ?`
+	query := `SELECT uname, password FROM users WHERE email = ?`
 	var users, password string
 	err := db.QueryRow(query, email_users).Scan(&users, &password)
 	if err == nil {
 		return email_users, users, password, nil
-	}
-	query = `SELECT uname, password FROM users WHERE email = ?`
-	var email string
-	err = db.QueryRow(query, email_users).Scan(&email, &password)
-	if err == nil {
-		return email, email_users, password, nil
 	}
 	return "", "", "", errors.New("not exists")
 }

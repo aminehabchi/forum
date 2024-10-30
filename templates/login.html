@@ -1,29 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/styles.css" />
     <title>Forum - Login</title>
+  </head>
 
-</head>
-
-<body>
-
+  <body>
     <div class="form-container">
-
-        <form class="myfrom" method="POST" action="/loginInfo">
-            <h1>login</h1>
-            <h2 style="color: red;">{{.}}</h2>
-            <label for="email">email</label>
-            <input class="input" type="text" name="email" placeholder="Enter your email" required><br>
-            <label for="password">email</label>
-            <input class="input" type="password" name="password" placeholder="Enter your password" required><br>
-            <input class="input" type="submit" name="login" value="login">
-        </form>
-        <p>New to forumApp? <a href="/register">Create an account</a></p>
+      <form class="myfrom" method="POST" action="/loginInfo">
+        <h1>login</h1>
+        <h2 style="color: red">{{.}}</h2>
+        <label for="email">email</label>
+        <input
+          class="input"
+          type="text"
+          name="email"
+          placeholder="Enter your email"
+          required
+        /><br />
+        <label for="password">password</label>
+        <input
+          class="input"
+          type="password"
+          name="password"
+          placeholder="Enter your password"
+          required
+        /><br />
+        <input class="input" type="submit" name="login" value="login" />
+      </form>
+      <p>New to forumApp? <a href="/register">Create an account</a></p>
     </div>
-</body>
-
+  </body>
 </html>

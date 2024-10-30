@@ -1,107 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modern Forum</title>
-    <link rel="stylesheet" href="/static/home.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
+    <link rel="stylesheet" href="/static/home.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <!-- Sidebar filter section -->
-        <button class="sidebar-toggle"><i class="fas fa-bars"></i></button>
-        <aside class="sidebar">
-            <div class="filter-section">
-                <h2><i class="fas fa-filter"></i> Filter</h2>
-                <form action="/filter" method="post" class="filter-form">
-                    <label for="category"><i class="fas fa-list-alt"></i> Category</label>
-                    <select name="category" id="category">
-                        <option value="">All Categories</option>
-                        {{range .Categories}}
-                        <option value="{{.}}">{{.}}</option>
-                        {{end}}
-                    </select>
+      <!-- Sidebar filter section -->
+      <button class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+      <aside class="sidebar">
+        <div class="filter-section">
+          <h2><i class="fas fa-filter"></i> Filter</h2>
+          <form action="/filter" method="post" class="filter-form">
+            <label for="category"
+              ><i class="fas fa-list-alt"></i> Category</label
+            >
+            <select name="category" id="category">
+              <option value="">All Categories</option>
+              {{range .Categories}}
+              <option value="{{.}}">{{.}}</option>
+              {{end}}
+            </select>
 
-                    {{if .IsLoggedIn}}
-                    <div class="toggle-filters">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="created-posts" name="created">
-                            <label for="created-posts">
-                                <i class="fas fa-user-circle"></i> My Created Posts
-                            </label>
-                        </div>
-                    
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="liked-posts" name="liked">
-                            <label for="liked-posts">
-                                <i class="fas fa-heart"></i> My Liked Posts
-                            </label>
-                        </div>
-                    </div>
-                    {{end}}
+            {{if .IsLoggedIn}}
+            <div class="toggle-filters">
+              <div class="checkbox-group">
+                <input type="checkbox" id="created-posts" name="created" />
+                <label for="created-posts">
+                  <i class="fas fa-user-circle"></i> My Created Posts
+                </label>
+              </div>
 
-                    <button type="submit" class="apply-btn"><i class="fas fa-check-circle"></i> Apply</button>
-                </form>
+              <div class="checkbox-group">
+                <input type="checkbox" id="liked-posts" name="liked" />
+                <label for="liked-posts">
+                  <i class="fas fa-heart"></i> My Liked Posts
+                </label>
+              </div>
             </div>
-        </aside>
+            {{end}}
 
-        <!-- Main content -->
-        <main class="main-content">
-            <header class="head">
-                <form class="headform" method="post">
-                    {{if .IsLoggedIn}}
-                    <input type="submit" class="btn" name="pst" value="Post" formaction="/Posting">
-                    <input type="submit" class="btn" csidebarlass="btn" name="logout" value="Logout" formaction="/logout">
-                    {{else}}
-                    <input type="submit" class="btn" name="login" value="Login" formaction="/login">
-                    <input type="submit" class="btn" name="register" value="Register" formaction="/register">
-                    {{end}}
-                </form>
-            </header>
+            <button type="submit" class="apply-btn">
+              <i class="fas fa-check-circle"></i> Apply
+            </button>
+          </form>
+        </div>
+      </aside>
 
-            <div class="Posts">
-                {{range .Posts}}
-                <div class="post">
-                    <h2 class="title">{{.Name}}: {{.Title}}</h2>
-                    {{range .Category}}
-                        <span class="category"><i class="fas fa-tag"></i> {{.}}</span>
-                    {{end}}
-                    <p class="content">{{.Content}}</p>
-                    <div class="post-actions">
-                        <a href="/like-dislike?commentid={{.ID}}&action=like&type=post"><i class="fas fa-thumbs-up"></i> {{.Likes}}</a>
-                        <a href="/like-dislike?commentid={{.ID}}&action=dislike&type=post"><i class="fas fa-thumbs-down"></i> {{.Dislikes}}</a>
-                        <a href="/Comment?post_id={{.ID}}"><i class="fas fa-comment"></i> Comments</a>
+      <!-- Main content -->
+      <main class="main-content">
+        <header class="head">
+          <form class="headform" method="post">
+            {{if .IsLoggedIn}}
+            <input
+              type="submit"
+              class="btn"
+              name="pst"
+              value="Post"
+              formaction="/Posting"
+            />
+            <input
+              type="submit"
+              class="btn"
+              csidebarlass="btn"
+              name="logout"
+              value="Logout"
+              formaction="/logout"
+            />
+            {{else}}
+            <input
+              type="submit"
+              class="btn"
+              name="login"
+              value="Login"
+              formaction="/login"
+            />
+            <input
+              type="submit"
+              class="btn"
+              name="register"
+              value="Register"
+              formaction="/register"
+            />
+            {{end}}
+          </form>
+        </header>
 
-                    </div>
-                </div>
-                {{end}}
+        <div class="Posts">
+          {{range .Posts}}
+          <div class="post">
+            <h2 class="title">{{.Name}}: {{.Title}}</h2>
+            {{range .Category}}
+            <span class="category"><i class="fas fa-tag"></i> {{.}}</span>
+            {{end}}
+            <p class="content">{{.Content}}</p>
+            <div class="post-actions">
+              <a href="/like-dislike?commentid={{.ID}}&action=like&type=post"
+                ><i class="fas fa-thumbs-up"></i> {{.Likes}}</a
+              >
+              <a href="/like-dislike?commentid={{.ID}}&action=dislike&type=post"
+                ><i class="fas fa-thumbs-down"></i> {{.Dislikes}}</a
+              >
+              <a href="/Comment?post_id={{.ID}}"
+                ><i class="fas fa-comment"></i> Comments</a
+              >
             </div>
-        </main>
+          </div>
+          {{end}}
+        </div>
+      </main>
     </div>
-</body>
-<script>
-    const sidebar = document.querySelector('.sidebar');
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
+  </body>
+  <script>
+    const sidebar = document.querySelector(".sidebar");
+    const sidebarToggle = document.querySelector(".sidebar-toggle");
 
     function toggleSidebar() {
-        sidebar.classList.toggle('active');
-        sidebarToggle.classList.toggle('hidden');
+      sidebar.classList.toggle("active");
+      sidebarToggle.classList.toggle("hidden");
     }
 
-    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarToggle.addEventListener("click", toggleSidebar);
 
     // Close sidebar when clicking outside of it
-    document.addEventListener('click', function(event) {
-        const isClickInsideSidebar = sidebar.contains(event.target);
-        const isClickOnToggle = sidebarToggle.contains(event.target);
+    document.addEventListener("click", function (event) {
+      const isClickInsideSidebar = sidebar.contains(event.target);
+      const isClickOnToggle = sidebarToggle.contains(event.target);
 
-        if (!isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('active')) {
-            toggleSidebar();
-        }
+      if (
+        !isClickInsideSidebar &&
+        !isClickOnToggle &&
+        sidebar.classList.contains("active")
+      ) {
+        toggleSidebar();
+      }
     });
-</script>
-
+  </script>
 </html>
