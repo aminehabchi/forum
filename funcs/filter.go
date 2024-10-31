@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"database/sql"
 	"net/http"
 )
 
@@ -15,6 +16,10 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	liked := r.FormValue("liked")
 
 	filteredPosts, err := filterPosts(category, created, liked, r)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return

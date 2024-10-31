@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 )
@@ -17,7 +18,7 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, err := r.Cookie("username")
-	if err!=nil{
+	if err != nil {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -31,7 +32,11 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err=addInteractions(username, commentid, action, types)
+	err = addInteractions(username, commentid, action, types)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
@@ -45,9 +50,12 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func addInteractions(username, postID, action, types string)error {
+func addInteractions(username, postID, action, types string) error {
 	interaction := 0
 	err := db.QueryRow("SELECT interaction FROM interactions where type = ? and post_id= ? and username= ?", types, postID, username).Scan(&interaction)
+	if err == sql.ErrNoRows {
+		return err
+	}
 	if err == nil {
 		if interaction == 1 && action == "like" {
 			interaction = 0
@@ -59,19 +67,19 @@ func addInteractions(username, postID, action, types string)error {
 			interaction = 0
 		}
 		_, err = db.Exec("UPDATE interactions SET interaction=? where type = ? and post_id= ? and username= ?", interaction, types, postID, username)
-		if err!=nil{
+		if err != nil {
 			return err
 		}
 	} else {
 		selector := `INSERT INTO interactions(username,post_id,type,interaction) VALUES (?,?,?,?)`
 		if action == "like" {
 			_, err := db.Exec(selector, username, postID, types, 1)
-			if err!=nil{
+			if err != nil {
 				return err
 			}
 		} else {
 			_, err := db.Exec(selector, username, postID, types, -1)
-			if err!=nil{
+			if err != nil {
 				return err
 			}
 		}

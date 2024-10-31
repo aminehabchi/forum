@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
@@ -43,6 +44,10 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post, err := getPost(id)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -93,12 +98,16 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 	post, err := getPost(id)
+	if err == sql.ErrNoRows {
+		http.Error(w,"bad request", http.StatusBadRequest)
+		return
+	}
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
 	Comments, err := GetComment(id)
@@ -126,7 +135,6 @@ func insertComment(postid int, uname, content string) error {
 func GetComment(id int) ([]COMMENT, error) {
 	rows, err := db.Query("SELECT id,post_id, uname, content FROM comments WHERE post_id = ?", id)
 	if err != nil {
-		log.Fatal(err, "99999")
 		return []COMMENT{}, err
 	}
 	defer rows.Close()

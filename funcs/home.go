@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 )
@@ -15,6 +16,10 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	posts, err := GetPosts()
+	if err == sql.ErrNoRows {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
