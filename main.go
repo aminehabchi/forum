@@ -8,7 +8,12 @@ import (
 )
 
 func main() {
-	err := forum.Createbase()
+	err := forum.ParseFiles()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = forum.Createbase()
 	if err != nil {
 		fmt.Println(err)
 		return

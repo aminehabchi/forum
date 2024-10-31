@@ -12,8 +12,15 @@ func IsPostLikedByUser(postID int, name string) bool {
 }
 
 func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("username")
-
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		return
+	}
+	c, err := r.Cookie("username")
+	if err!=nil{
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	username := c.Value
 	postID := r.FormValue("post_id")
 	action := r.FormValue("action")
@@ -24,7 +31,11 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	addInteractions(username, commentid, action, types)
+	err=addInteractions(username, commentid, action, types)
+	if err != nil {
+		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+		return
+	}
 
 	if types == "post" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -34,7 +45,7 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func addInteractions(username, postID, action, types string) {
+func addInteractions(username, postID, action, types string)error {
 	interaction := 0
 	err := db.QueryRow("SELECT interaction FROM interactions where type = ? and post_id= ? and username= ?", types, postID, username).Scan(&interaction)
 	if err == nil {
@@ -48,15 +59,22 @@ func addInteractions(username, postID, action, types string) {
 			interaction = 0
 		}
 		_, err = db.Exec("UPDATE interactions SET interaction=? where type = ? and post_id= ? and username= ?", interaction, types, postID, username)
-		fmt.Println(err)
+		if err!=nil{
+			return err
+		}
 	} else {
 		selector := `INSERT INTO interactions(username,post_id,type,interaction) VALUES (?,?,?,?)`
 		if action == "like" {
 			_, err := db.Exec(selector, username, postID, types, 1)
-			fmt.Println(err)
+			if err!=nil{
+				return err
+			}
 		} else {
 			_, err := db.Exec(selector, username, postID, types, -1)
-			fmt.Println(err)
+			if err!=nil{
+				return err
+			}
 		}
 	}
+	return nil
 }

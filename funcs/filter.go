@@ -1,22 +1,27 @@
 package forum
 
 import (
-	"fmt"
-	"html/template"
 	"net/http"
 )
 
 func FilterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	category := r.FormValue("category")
 	created := r.FormValue("created")
 	liked := r.FormValue("liked")
 
-	filteredPosts := filterPosts(category, created, liked, r)
-
-	_, err := r.Cookie("username")
+	filteredPosts, err := filterPosts(category, created, liked, r)
+	if err != nil {
+		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+		return
+	}
+	_, err = r.Cookie("username")
 	isLoggedIn := err == nil
 
-	temp, _ := template.ParseFiles("templates/home.html")
 	data := struct {
 		Posts      []POST
 		IsLoggedIn bool
@@ -26,15 +31,18 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 		IsLoggedIn: isLoggedIn,
 		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
 	}
-	temp.Execute(w, data)
+	err = HomeT.Execute(w, data)
+	if err != nil {
+		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
-func filterPosts(category, created, liked string, r *http.Request) []POST {
+func filterPosts(category, created, liked string, r *http.Request) ([]POST, error) {
 	var filteredPosts []POST
 	posts, e := GetPosts()
 	if e != nil {
-		fmt.Println(e)
-		return []POST{}
+		return []POST{}, e
 	}
 	user, _ := r.Cookie("username")
 	for _, post := range posts {
@@ -57,7 +65,7 @@ func filterPosts(category, created, liked string, r *http.Request) []POST {
 		filteredPosts = append(filteredPosts, post)
 	}
 
-	return filteredPosts
+	return filteredPosts, nil
 }
 
 func ElementExists(arr []string, elem string) bool {

@@ -1,26 +1,25 @@
 package forum
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	temp, err := template.ParseFiles("templates/home.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Println("Template parsing error:", err)
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-
+	if r.URL.Path != "/" {
+		http.Error(w, "page not found", 404)
+		return
+	}
 	posts, err := GetPosts()
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
 		return
 	}
-
 	_, err = r.Cookie("username")
 	isLoggedIn := err == nil
 
@@ -34,7 +33,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
 	}
 
-	err = temp.Execute(w, data)
+	err = HomeT.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Template execution error:", err)

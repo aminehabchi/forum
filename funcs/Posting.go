@@ -1,31 +1,30 @@
 package forum
 
 import (
-	"fmt"
-	"html/template"
 	"net/http"
 	"strings"
 )
 
 func Posting(w http.ResponseWriter, r *http.Request) {
-	temp, err := template.ParseFiles("templates/Posting.html")
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		return
+	}
+	err := PostingT.Execute(w, nil)
 	if err != nil {
 		http.Error(w, "Could not load template", http.StatusInternalServerError)
 		return
 	}
-	// categories := []string{"General", "Technology", "Sports", "Entertainment"}
-
-	temp.Execute(w, nil)
 }
 
 func PostInfo(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("username")
-
-	// r.PostForm("categories")
-
-	temp, err := template.ParseFiles("templates/Posting.html")
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		return
+	}
+	c, err := r.Cookie("username")
 	if err != nil {
-		http.Error(w, "Could not load template", http.StatusInternalServerError)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -36,24 +35,29 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 
 	if title == "" || content == "" || len(category) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		temp.Execute(w, "All fields are required, Please fill them")
+		err = PostingT.Execute(w, "All fields are required, Please fill them")
+		if err != nil {
+			http.Error(w, "Could not load template", http.StatusInternalServerError)
+		}
 		return
 	}
 
 	if !CategoryFilter(category) {
 		w.WriteHeader(http.StatusBadRequest)
-		temp.Execute(w, "Invalid categorie, Please write valid catgerie")
+		err = PostingT.Execute(w, "Invalid categorie, Please write valid catgerie")
+		if err != nil {
+			http.Error(w, "Could not load template", http.StatusInternalServerError)
+		}
 		return
 	}
 
 	err = insertPost(uname, title, content, strings.Join(category, " "))
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func insertPost(uname, title, content, category string) error {

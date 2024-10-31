@@ -1,8 +1,6 @@
 package forum
 
 import (
-	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -25,14 +23,24 @@ type data struct {
 }
 
 func Commenting(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.FormValue("post_id"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	content := r.FormValue("Content")
-	c, _ := r.Cookie("username")
+	c, err := r.Cookie("username")
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
 	uname := c.Value
+	content := r.FormValue("Content")
+
+	id, err := strconv.Atoi(r.FormValue("post_id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	post, err := getPost(id)
 	if err != nil {
@@ -40,21 +48,22 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	temp, err := template.ParseFiles("templates/comment.html")
-	if err != nil {
-		http.Error(w, "Could not load template", http.StatusInternalServerError)
-		return
-	}
-
 	if content == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		Comments, _ := GetComment(id)
-		ff := data{
+		Comments, err := GetComment(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		DATA := data{
 			Post:     post,
 			COMMENT:  Comments,
 			ErrorMsg: "Comment cannot be empty. Please enter some content.",
 		}
-		temp.Execute(w, ff)
+		err = CommentT.Execute(w, DATA)
+		if err != nil {
+			http.Error(w, "Could not load template", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -70,14 +79,21 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ff := data{Post: post, COMMENT: Comments}
-	temp.Execute(w, ff)
+	DATA := data{Post: post, COMMENT: Comments}
+	err = CommentT.Execute(w, DATA)
+	if err != nil {
+		http.Error(w, "Could not load template", http.StatusInternalServerError)
+	}
 }
 
 func Comment(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		return
+	}
 	id, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	post, err := getPost(id)
@@ -90,15 +106,12 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	temp, err := template.ParseFiles("templates/comment.html")
+
+	Data := data{Post: post, COMMENT: Comments}
+	err = CommentT.Execute(w, Data)
 	if err != nil {
 		http.Error(w, "Could not load template", http.StatusInternalServerError)
-		return
 	}
-
-	fmt.Println(post.ID)
-	ff := data{Post: post, COMMENT: Comments}
-	temp.Execute(w, ff)
 }
 
 func insertComment(postid int, uname, content string) error {
