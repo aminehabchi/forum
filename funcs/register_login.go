@@ -25,13 +25,17 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	uname, _ := r.Cookie("username")
+	uname, err := r.Cookie("username")
+	if err!=nil{
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	cookie := http.Cookie{
 		Name:   "username",
 		MaxAge: -1,
 	}
 	http.SetCookie(w, &cookie)
-	err := setLoginTime(0, uname.Value)
+	err = setLoginTime(0, uname.Value)
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
