@@ -22,13 +22,10 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	c, err := r.Cookie("username")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	var err error
+	c, _ := r.Cookie("Token")
 
-	uname := c.Value
+	uname := TokenMap[c.Value][1]
 	title := r.FormValue("title")
 	content := r.FormValue("content")
 	category := r.Form["categories"]

@@ -28,13 +28,9 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	c, err := r.Cookie("username")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	uname := c.Value
+	c, _ := r.Cookie("Token")
+	
+	uname := TokenMap[c.Value][1]
 	content := r.FormValue("Content")
 
 	id, err := strconv.Atoi(r.FormValue("post_id"))

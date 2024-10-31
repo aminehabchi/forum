@@ -25,7 +25,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error getting posts:", err)
 		return
 	}
-	_, err = r.Cookie("username")
+	_, err = r.Cookie("Token")
 	isLoggedIn := err == nil
 
 	data := struct {

@@ -18,28 +18,29 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
+	forum.TokenMap = make(map[string][2]string)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	http.HandleFunc("/", forum.Home)
 
-	http.HandleFunc("/register", forum.Register)
-	http.HandleFunc("/registerIngo", forum.RegisterIngo)
+	http.HandleFunc("/register", forum.AuthLG(forum.Register))
+	http.HandleFunc("/registerIngo", forum.AuthLG(forum.RegisterIngo))
 
-	http.HandleFunc("/login", forum.Login)
-	http.HandleFunc("/loginInfo", forum.LoginInfo)
+	http.HandleFunc("/login", forum.AuthLG(forum.Login))
+	http.HandleFunc("/loginInfo", forum.AuthLG(forum.LoginInfo))
 
 	http.HandleFunc("/Posting", forum.Auth(forum.Posting))
 	http.HandleFunc("/PostInfo", forum.Auth(forum.PostInfo))
 
-	http.HandleFunc("/logout", forum.Logout)
+	http.HandleFunc("/logout", forum.Auth(forum.Logout))
 
 	http.HandleFunc("/Comment", forum.Comment)
 	http.HandleFunc("/Commenting", forum.Auth(forum.Commenting))
 
 	http.HandleFunc("/like-dislike", forum.Auth(forum.HandleLikeDislike))
 	http.HandleFunc("/filter", forum.FilterHandler)
+
 	fmt.Println("http://localhost:8081/")
 	http.ListenAndServe(":8081", nil)
 }

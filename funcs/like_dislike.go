@@ -16,12 +16,9 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	c, err := r.Cookie("username")
-	if err != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	username := c.Value
+	c, _ := r.Cookie("Token")
+
+	username := TokenMap[c.Value][1]
 	postID := r.FormValue("post_id")
 	action := r.FormValue("action")
 	types := r.FormValue("type")
@@ -31,7 +28,7 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = addInteractions(username, commentid, action, types)
+	err := addInteractions(username, commentid, action, types)
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
