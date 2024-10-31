@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 )
@@ -33,10 +32,6 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = addInteractions(username, commentid, action, types)
-	if err == sql.ErrNoRows {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
@@ -53,9 +48,6 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 func addInteractions(username, postID, action, types string) error {
 	interaction := 0
 	err := db.QueryRow("SELECT interaction FROM interactions where type = ? and post_id= ? and username= ?", types, postID, username).Scan(&interaction)
-	if err == sql.ErrNoRows {
-		return err
-	}
 	if err == nil {
 		if interaction == 1 && action == "like" {
 			interaction = 0
