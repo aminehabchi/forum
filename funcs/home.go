@@ -16,11 +16,8 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	posts, err := GetPosts()
-	if err == sql.ErrNoRows {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	if err != nil {
+	
+	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
 		return

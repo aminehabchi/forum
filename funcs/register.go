@@ -64,7 +64,7 @@ func RegisterIngo(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusUnauthorized)
 	}
 }
 

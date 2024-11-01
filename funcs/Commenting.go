@@ -29,7 +29,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, _ := r.Cookie("Token")
-	
+
 	uname := TokenMap[c.Value][1]
 	content := r.FormValue("Content")
 
@@ -40,11 +40,8 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post, err := getPost(id)
-	if err == sql.ErrNoRows {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	if err != nil {
+	
+	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -98,11 +95,8 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	post, err := getPost(id)
-	if err == sql.ErrNoRows {
-		http.Error(w,"bad request", http.StatusBadRequest)
-		return
-	}
-	if err != nil {
+
+	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
