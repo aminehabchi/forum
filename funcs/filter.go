@@ -24,7 +24,7 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
 	}
-	_, err = r.Cookie("username")
+	_, err = r.Cookie("Token")
 	isLoggedIn := err == nil
 
 	data := struct {
@@ -49,20 +49,20 @@ func filterPosts(category, created, liked string, r *http.Request) ([]POST, erro
 	if e != nil {
 		return []POST{}, e
 	}
-	user, _ := r.Cookie("username")
+	user, _ := r.Cookie("Token")
 	for _, post := range posts {
 		if category != "" && !ElementExists(post.Category, category) {
 			continue
 		}
 
 		if created == "on" {
-			if post.Name != user.Value {
+			if post.Name != TokenMap[user.Value][1] {
 				continue
 			}
 		}
 
 		if liked == "on" {
-			if !IsPostLikedByUser(post.ID, user.Value) {
+			if !IsPostLikedByUser(post.ID, TokenMap[user.Value][1]) {
 				continue
 			}
 		}

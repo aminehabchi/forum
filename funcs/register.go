@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"fmt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -31,7 +30,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterIngo(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("qqq")
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
