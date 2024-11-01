@@ -7,11 +7,21 @@ import (
 func Auth(funcNext http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("Token")
-		_, ok := TokenMap[c.Value]
-		if err != nil || !ok {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		if err == nil {
+			_, ok := TokenMap[c.Value]
+			if !ok {
+				cookie := http.Cookie{
+					Name:   "Token",
+					MaxAge: -1,
+				}
+				http.SetCookie(w, &cookie)
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			} else {
+				funcNext.ServeHTTP(w, r)
+			}
 		} else {
-			funcNext.ServeHTTP(w, r)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 		}
 	}
 }
