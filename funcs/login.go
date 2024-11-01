@@ -62,6 +62,7 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 	uuidStr, err := GenereteTocken()
 	if err != nil {
 		http.Error(w, "err in token", http.StatusInternalServerError)
+		return
 	}
 	TokenMap[uuidStr] = [2]string{email, uname}
 	newCookie := http.Cookie{

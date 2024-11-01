@@ -41,6 +41,6 @@ func main() {
 	http.HandleFunc("/like-dislike", forum.Auth(forum.HandleLikeDislike))
 	http.HandleFunc("/filter", forum.FilterHandler)
 
-	fmt.Println("http://localhost:8081/")
-	http.ListenAndServe(":8081", nil)
+	fmt.Println("http://localhost:8080/")
+	http.ListenAndServe(":8080", nil)
 }
