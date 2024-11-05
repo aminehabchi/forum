@@ -4,6 +4,6 @@
 
 ==>add profile
 
-==>add headear to all template
+==>add header to all template
 
 add your 
