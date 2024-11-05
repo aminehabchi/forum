@@ -25,7 +25,7 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 	var err error
 	c, _ := r.Cookie("Token")
 
-	uname := TokenMap[c.Value][1]
+	uname ,_:= GetUserNameFromToken(c.Value)
 	title := r.FormValue("title")
 	content := r.FormValue("content")
 	category := r.Form["categories"]

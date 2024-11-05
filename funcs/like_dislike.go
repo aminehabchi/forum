@@ -17,8 +17,7 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, _ := r.Cookie("Token")
-
-	username := TokenMap[c.Value][1]
+	username ,_:= GetUserNameFromToken(c.Value)
 	postID := r.FormValue("post_id")
 	action := r.FormValue("action")
 	types := r.FormValue("type")

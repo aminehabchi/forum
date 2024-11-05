@@ -26,13 +26,12 @@ func GetPosts() ([]POST, error) {
 }
 
 func getLikeDisLike(types string, post_id, inter int) int {
-	Like, err := db.Query("SELECT interaction FROM interactions where post_id=? and type= ? and interaction=?", post_id, types, inter)
+	// Use a count query to directly get the number of interactions
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM interactions WHERE post_id=? AND type=? AND interaction=?", post_id, types, inter).Scan(&count)
 	if err != nil {
+		// Optionally log the error
 		return 0
 	}
-	i := 0
-	for Like.Next() {
-		i++
-	}
-	return i
+	return count
 }

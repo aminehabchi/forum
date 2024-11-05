@@ -69,8 +69,8 @@ func RegisterIngo(w http.ResponseWriter, r *http.Request) {
 }
 
 func InsertUserInfo(email, password, uname string) error {
-	selector := `INSERT INTO users(password,uname,email) VALUES (?,?,?)`
-	_, err := db.Exec(selector, password, uname, email)
+	selector := `INSERT INTO users(password,uname,email,tokenTime) VALUES (?,?,?,?)`
+	_, err := db.Exec(selector, password, uname, email, "00-00-0000")
 	if err != nil {
 		return err
 	}

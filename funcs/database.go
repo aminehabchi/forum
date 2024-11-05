@@ -17,10 +17,12 @@ func Createbase() error {
 
 	createTableSQL := `
     CREATE TABLE IF NOT EXISTS users (
-        password TEXT NOT NULL ,
+        email TEXT NOT NULL UNIQUE,
         uname TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL ,
 		is_active INTEGER DEFAULT 0,
-        email TEXT NOT NULL UNIQUE
+		token TEXT UNIQUE,
+		tokenTime TEXT
     );
 	CREATE TABLE IF NOT EXISTS comments (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,

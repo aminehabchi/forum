@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,8 +8,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-var TokenMap = make(map[string][2]string)
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -50,28 +47,28 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	err = setLoginTime(1, uname)
-	if err != nil {
-		if err.Error() == "already login" {
-			LoginT.Execute(w, "user already login")
-		} else {
-			http.Error(w, "Could not load template", http.StatusInternalServerError)
-		}
-		return
-	}
 	uuidStr, err := GenereteTocken()
 	if err != nil {
 		http.Error(w, "err in token", http.StatusInternalServerError)
 		return
 	}
-	TokenMap[uuidStr] = [2]string{email, uname}
+	err = setLoginTime(1, uuidStr, uname)
+	if err != nil {
+		if err.Error() == "already login" {
+			LoginT.Execute(w, "user already login")
+		} else {
+			http.Error(w, "Could not load template1", http.StatusInternalServerError)
+		}
+		return
+	}
 	newCookie := http.Cookie{
 		Name:     "Token",
 		Value:    uuidStr,
-		Expires:  time.Now().Add(24 * time.Hour),
+		Expires:  time.Now().Add(1 * time.Minute),
 		HttpOnly: true,
 		Secure:   true,
 	}
+
 	http.SetCookie(w, &newCookie)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -87,26 +84,43 @@ func GetUserInfoByLoginInfo(email_users string) (string, string, string, error) 
 	return "", "", "", errors.New("not exists")
 }
 
-func setLoginTime(bl int, uname string) error {
+func setLoginTime(bl int, token, uname string) error {
 	isActive := 0
-	query1 := `SELECT is_active FROM users WHERE uname=?`
-	err := db.QueryRow(query1, uname).Scan(&isActive)
-
-	if err == sql.ErrNoRows {
-		return nil
-	}
+	loginTime := ""
+	query := `SELECT is_active,tokenTime FROM users WHERE uname=?`
+	err := db.QueryRow(query, uname).Scan(&isActive, &loginTime)
 	if err != nil {
-		fmt.Println("select is_active err", err)
+		fmt.Println(err)
 		return err
 	}
-	if bl == 1 && isActive == 1 {
-		return errors.New("already login")
-	}
-	query := "UPDATE users SET is_active=? WHERE uname=?"
-	_, err = db.Exec(query, bl, uname)
-	if err != nil {
-		fmt.Println("err update", err)
-		return err
+	if bl == 1 {
+		if isActive == 1 && loginTime != "00-00-0000" {
+			t, _ := stringToTime(loginTime)
+			tt := t.Add(1 * time.Minute)
+			if tt.Before(time.Now()) {
+				return errors.New("already login")
+			}
+		}
+		query = "UPDATE users SET token=?,is_active=?,tokenTime=? WHERE uname=?"
+		_, err = db.Exec(query, token, 1, timeToString(time.Now()), uname)
+		if err != nil {
+			return err
+		}
+	} else {
+		query = "UPDATE users SET is_active=? WHERE uname=?"
+		_, err = db.Exec(query, 0, uname)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func timeToString(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
+}
+
+func stringToTime(s string) (time.Time, error) {
+	layout := "2006-01-02 15:04:05"
+	return time.Parse(layout, s)
 }

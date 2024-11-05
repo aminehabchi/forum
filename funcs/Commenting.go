@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -29,7 +30,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, _ := r.Cookie("Token")
-	uname := TokenMap[c.Value][1]
+	uname, _ := GetUserNameFromToken(c.Value)
 	content := r.FormValue("Content")
 
 	id, err := strconv.Atoi(r.FormValue("post_id"))
@@ -38,29 +39,10 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := getPost(id)
-
-	if err != nil && err != sql.ErrNoRows {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	if content == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		Comments, err := GetComment(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		DATA := data{
-			Post:     post,
-			COMMENT:  Comments,
-			ErrorMsg: "Comment cannot be empty. Please enter some content.",
-		}
-		err = CommentT.Execute(w, DATA)
-		if err != nil {
-			http.Error(w, "Could not load template", http.StatusInternalServerError)
-		}
+		link := fmt.Sprintf("/Comment?post_id=%v", id)
+		http.Redirect(w, r, link, http.StatusSeeOther)
 		return
 	}
 
@@ -70,17 +52,8 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Comments, err := GetComment(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	DATA := data{Post: post, COMMENT: Comments}
-	err = CommentT.Execute(w, DATA)
-	if err != nil {
-		http.Error(w, "Could not load template", http.StatusInternalServerError)
-	}
+	link := fmt.Sprintf("/Comment?post_id=%v", id)
+	http.Redirect(w, r, link, http.StatusSeeOther)
 }
 
 func Comment(w http.ResponseWriter, r *http.Request) {

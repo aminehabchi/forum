@@ -10,14 +10,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, _ := r.Cookie("Token")
-	uname := TokenMap[c.Value][1]
-	delete(TokenMap, c.Value)
+	uname ,_:= GetUserNameFromToken(c.Value)
 	cookie := http.Cookie{
 		Name:   "Token",
 		MaxAge: -1,
 	}
 	http.SetCookie(w, &cookie)
-	err := setLoginTime(0, uname)
+	err := setLoginTime(0,"" ,uname)
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
