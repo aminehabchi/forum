@@ -20,9 +20,7 @@ func Createbase() error {
         email TEXT NOT NULL UNIQUE,
         uname TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL ,
-		is_active INTEGER DEFAULT 0,
-		token TEXT UNIQUE,
-		tokenTime TEXT
+		token TEXT UNIQUE
     );
 	CREATE TABLE IF NOT EXISTS comments (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -2,7 +2,6 @@ package forum
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -52,13 +51,9 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "err in token", http.StatusInternalServerError)
 		return
 	}
-	err = setLoginTime(1, uuidStr, uname)
+	err = setLoginTime(uuidStr, uname)
 	if err != nil {
-		if err.Error() == "already login" {
-			LoginT.Execute(w, "user already login")
-		} else {
-			http.Error(w, "Could not load template1", http.StatusInternalServerError)
-		}
+		http.Error(w, "error in token", http.StatusInternalServerError)
 		return
 	}
 	newCookie := http.Cookie{
@@ -84,43 +79,9 @@ func GetUserInfoByLoginInfo(email_users string) (string, string, string, error) 
 	return "", "", "", errors.New("not exists")
 }
 
-func setLoginTime(bl int, token, uname string) error {
-	isActive := 0
-	loginTime := ""
-	query := `SELECT is_active,tokenTime FROM users WHERE uname=?`
-	err := db.QueryRow(query, uname).Scan(&isActive, &loginTime)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	if bl == 1 {
-		if isActive == 1 && loginTime != "00-00-0000" {
-			t, _ := stringToTime(loginTime)
-			tt := t.Add(1 * time.Minute)
-			if tt.Before(time.Now()) {
-				return errors.New("already login")
-			}
-		}
-		query = "UPDATE users SET token=?,is_active=?,tokenTime=? WHERE uname=?"
-		_, err = db.Exec(query, token, 1, timeToString(time.Now()), uname)
-		if err != nil {
-			return err
-		}
-	} else {
-		query = "UPDATE users SET is_active=? WHERE uname=?"
-		_, err = db.Exec(query, 0, uname)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
+func setLoginTime(token, uname string) error {
+	query := "UPDATE users SET token=? WHERE uname=?"
+	_, err := db.Exec(query, token, uname)
 
-func timeToString(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05")
-}
-
-func stringToTime(s string) (time.Time, error) {
-	layout := "2006-01-02 15:04:05"
-	return time.Parse(layout, s)
+	return err
 }
