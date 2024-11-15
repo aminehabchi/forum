@@ -5,7 +5,7 @@ WORKDIR /Forum/
 
 # Install dependencies for go-sqlite3 and Bash
 RUN apk update && \
-    apk add --no-cache bash gcc musl-dev
+    apk add bash gcc musl-dev
 
 # Copy go.mod and go.sum files first to leverage Docker cache
 COPY go.mod go.sum ./
