@@ -15,23 +15,19 @@ func Createbase() error {
 		return err
 	}
 
-	
+	// Enable foreign key constraints
+	_, err = db.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return err
+	}
 
 	createTableSQL := `
     CREATE TABLE IF NOT EXISTS users (
 	    id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL UNIQUE,
         uname TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL ,
+        password TEXT NOT NULL,
 		token TEXT UNIQUE
-    );
-	CREATE TABLE IF NOT EXISTS comments (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-        post_id INTEGER NOT NULL ,
-        user_id INTEGER NOT NULL,
-        content TEXT NOT NULL,
-		FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 	CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,6 +37,14 @@ func Createbase() error {
 		user_id INTEGER NOT NULL,
 		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 	);
+	CREATE TABLE IF NOT EXISTS comments (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+		FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
 	CREATE TABLE IF NOT EXISTS post_interactions (
 		user_id INTEGER,
 		post_id INTEGER,
@@ -55,9 +59,11 @@ func Createbase() error {
 		FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
     	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 	);`
+
 	_, err = db.Exec(createTableSQL)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
