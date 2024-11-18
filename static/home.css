@@ -1,4 +1,3 @@
-/* Global Styles */
 * {
     margin: 0;
     padding: 0;
@@ -7,150 +6,127 @@
 
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: #212121;
+    color: #ECECEC;
+    width: 70%;
+    margin: auto;
 }
 
-.container {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* Sidebar Styles */
-.sidebar {
-    width: 260px;
-    background-color: #1e1f29;
-    color: #fff;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    height: 100vh;
-    overflow-y: auto;
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-
-.sidebar-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background-color: #1e1f29;
-    border: none;
-    color: #fff;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 50%;
-    z-index: 1001;
-    display: none; /* Hide by default, show on small screens */
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
-    font-size: 18px;
-}
-
-.filter-form label {
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-.filter-form select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 5px;
-    border: none;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
-.checkbox-group input[type="checkbox"] {
-    display: none;
-}
-
-.checkbox-group label {
-    display: inline-block;
-    background-color: #3a3b47;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
-    width: 100%;
-}
-
-.checkbox-group label i {
-    margin-right: 10px;
-}
-
-.checkbox-group input[type="checkbox"]:checked + label {
-    background-color: #e9b949;
-    color: #fff;
-}
-
-.checkbox-group input[type="checkbox"]:checked + label:hover {
-    background-color: #d89d3b;
-}
-
-.checkbox-group label:hover {
-    background-color: #4a4b58;
-}
-
-.apply-btn {
-    background-color: #e9b949;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.apply-btn:hover {
-    background-color: #d89d3b;
-}
-
-/* Main Content Styles */
-.main-content {
-    flex: 1;
-    padding: 40px;
-    background-color: #f8f9fa;
-    margin-left: 260px;
-    transition: margin-left 0.3s ease;
-}
 
 .head {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-bottom: 30px;
+    align-items: center;
+    border-bottom: 1px solid gray;
 }
 
-.headform .btn {
-    background-color: #007bff;
-    color: #fff;
+.logo {
+    font-family: "Beau Rivage", serif;
+    font-size: 45px;
+    font-weight: 700;
+    font-style: normal;
+    text-decoration: none;
+    color: #ECECEC;
+}
+
+
+.head .btn {
+    text-decoration: none;
+    border: 1px solid gray;
+    font-weight: 400;
+    color: white;
+    font-family: "Beau Rivage", serif;
+    padding: 5px 10px;
+    border-radius: 18px;
+    font-size: 18px;
+    transition: 0.1s;
+}
+
+.head .btn1 {
     border: none;
-    padding: 10px 20px;
-    margin-left: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
+    background-color: #E0E0E0;
+    color: black;
 }
 
-.headform .btn:hover {
-    background-color: #0056b3;
+.head .btn2:hover {
+    background-color: rgb(75, 75, 75);
+    color: white;
 }
+
+.filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter input {
+    display: none;
+}
+
+.filter span{
+    background-color: #2F2F2F;
+    padding: 7px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.filter select {
+    padding: 6px;
+    font-size: 15px;
+    background-color:#2F2F2F ;
+    color: white;
+    border: none;
+}
+
+.filter input:checked + span{
+    background-color: #ECECEC;
+    color: black;
+}
+
+.apply-btn {
+    padding: 2px;
+    cursor: pointer;
+}
+
+.main-content {
+    width: 100%;
+    padding: 40px;
+    transition: margin-left 0.3s ease;
+    border-radius: 10px;
+}
+
+.profilInfo {
+    display: flex;
+    align-items: center;
+}
+
+.profilInfo span {
+    font-family: "Roboto Slab", serif;
+    font-size: 20px;
+}
+
+.profileImg {
+    height: 40px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 12px;
+} 
+
+.post h4 {
+    margin: 8px 8px 5px 8px;
+}
+
 
 /* Post Styles */
 .Posts {
     display: grid;
-    gap: 20px;
+    gap: 8px;
 }
 
 .post {
-    background-color: #fff;
+    background-color: #2F2F2F;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
@@ -158,81 +134,57 @@ body {
     overflow:auto;
 }
 
-.post:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-}
 
-.title {
-    font-size: 20px;
-    color: #007bff;
-    margin-bottom: 10px;
-}
+
 
 .category {
     font-size: 14px;
-    color: #555;
+    color: #999;
     margin-bottom: 15px;
 }
 
 .content {
     font-size: 16px;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.post-actions {
-    display: flex;
-    flex-wrap: wrap;
+    margin: 10px;
 }
 
 .action-btn {
-    background-color: #f8f9fa;
-    border: none;
+    text-decoration: none;
+    background-color: rgba(0, 0, 0, 0.3);
     padding: 10px;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
+    border-radius: 30px;
+    color: #ECECEC;
     transition: background-color 0.3s ease;
-    margin-bottom: 10px;
+    margin: 5px;
 }
 
-.action-btn:hover {
-    background-color: #e9ecef;
+.rightBtns {
+    display: flex;
+    align-items: center;
 }
 
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 80%;
-        max-width: 300px;
-    }
+.rightBtns label{
+    font-size: 22px;
+    cursor: pointer;
+}
 
-    .sidebar.active {
-        transform: translateX(0);
-    }
+.rightBtns label:nth-child(1) {
+    margin-right: 35px;
+}
 
-    .sidebar-toggle {
-        display: block; /* Show the toggle button on small screens */
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
+.postbtn {
+    display: none;
+}
 
-    .sidebar-toggle.hidden {
-        opacity: 0;
-        visibility: hidden;
-    }
-
-    .main-content {
-        margin-left: 0;
-        padding: 20px;
-    }
-
-    .Posts {
-        grid-template-columns: 1fr;
-    }
-
-    .action-btn {
+@media (max-width: 600px) {
+    body{
         width: 100%;
-        margin-bottom: 10px;
+        padding: 5px;
+    }
+    .main-content {
+        padding: 10px;
+    }
+    .filter {
+        padding: 10px;
     }
 }

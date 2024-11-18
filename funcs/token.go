@@ -16,11 +16,11 @@ func GenereteTocken() (string, error) {
 	return u2.String(), nil
 }
 
-func GetUserNameFromToken(uuid string) (string, error) {
-	uname := ""
-	err := db.QueryRow("SELECT uname FROM users WHERE token=?", uuid).Scan(&uname)
+func GetUserNameFromToken(uuid string) (int, error) {
+	id := 0
+	err := db.QueryRow("SELECT id FROM users WHERE token=?", uuid).Scan(&id)
 	if err != nil {
-		return "", err
+		return -1, err
 	}
-	return uname, nil
+	return id, nil
 }

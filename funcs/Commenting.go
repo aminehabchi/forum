@@ -11,6 +11,7 @@ import (
 
 type COMMENT struct {
 	Id       int
+	USER_ID  int
 	Uname    string
 	Content  string
 	Postid   int
@@ -30,10 +31,10 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, _ := r.Cookie("Token")
-	uname, _ := GetUserNameFromToken(c.Value)
+	user_id, _ := GetUserNameFromToken(c.Value)
 	content := r.FormValue("Content")
 
-	id, err := strconv.Atoi(r.FormValue("post_id"))
+	post_id, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -41,18 +42,18 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 
 	if content == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		link := fmt.Sprintf("/Comment?post_id=%v", id)
+		link := fmt.Sprintf("/Comment?post_id=%v", post_id)
 		http.Redirect(w, r, link, http.StatusSeeOther)
 		return
 	}
 
-	err = insertComment(id, uname, content)
+	err = insertComment(post_id, user_id, content)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	link := fmt.Sprintf("/Comment?post_id=%v", id)
+	link := fmt.Sprintf("/Comment?post_id=%v", post_id)
 	http.Redirect(w, r, link, http.StatusSeeOther)
 }
 
@@ -61,18 +62,20 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	id, err := strconv.Atoi(r.FormValue("post_id"))
+	post_id, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	post, err := getPost(id)
+
+	post, err := getPost(post_id)
 
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(post_id)
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	Comments, err := GetComment(id)
+	Comments, err := GetComment(post_id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -85,9 +88,9 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func insertComment(postid int, uname, content string) error {
-	selector := `INSERT INTO comments(post_id,uname,content) VALUES (?,?,?)`
-	_, err := db.Exec(selector, postid, uname, content)
+func insertComment(postid, user_id int, content string) error {
+	selector := `INSERT INTO comments(post_id,user_id,content) VALUES (?,?,?)`
+	_, err := db.Exec(selector, postid, user_id, content)
 	if err != nil {
 		return err
 	}
@@ -95,7 +98,7 @@ func insertComment(postid int, uname, content string) error {
 }
 
 func GetComment(id int) ([]COMMENT, error) {
-	rows, err := db.Query("SELECT id,post_id, uname, content FROM comments WHERE post_id = ?", id)
+	rows, err := db.Query("SELECT comments.id,comments.post_id, users.uname, comments.content FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.id DESC", id)
 	if err != nil {
 		return []COMMENT{}, err
 	}
@@ -111,9 +114,8 @@ func GetComment(id int) ([]COMMENT, error) {
 			return []COMMENT{}, err
 		}
 		comment := COMMENT{Id: id, Postid: pid, Uname: uname, Content: content}
-		comment.Likes = getLikeDisLike("comment", id, 1)
-
-		comment.Dislikes = getLikeDisLike("comment", id, -1)
+		comment.Likes = getCommentLikeDisLike(id, 1)
+		comment.Dislikes = getCommentLikeDisLike(id, -1)
 		comments = append(comments, comment)
 	}
 
@@ -126,11 +128,12 @@ func GetComment(id int) ([]COMMENT, error) {
 }
 
 func getPost(id int) (POST, error) {
-	query := `SELECT id,uname, title, content, category FROM posts WHERE id = ?`
+	query := `SELECT posts.id, posts.title, posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id WHERE posts.id = ?`
 	var post POST
 	var str string
-	err := db.QueryRow(query, id).Scan(&post.ID, &post.Name, &post.Title, &post.Content, &str)
+	err := db.QueryRow(query, id).Scan(&post.ID, &post.Title, &post.Content, &str, &post.Name)
 	if err != nil {
+		fmt.Println(err)
 		return POST{}, err
 	}
 	post.Category = strings.Split(str, " ")

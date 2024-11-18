@@ -30,7 +30,7 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	_, uname, correctPassword, err := GetUserInfoByLoginInfo(email)
+	_, id, correctPassword, err := GetUserInfoByLoginInfo(email)
 	if err != nil {
 		err = LoginT.Execute(w, "email not found")
 		if err != nil {
@@ -51,7 +51,7 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "err in token", http.StatusInternalServerError)
 		return
 	}
-	err = setLoginTime(uuidStr, uname)
+	err = setLoginTime(uuidStr, id)
 	if err != nil {
 		http.Error(w, "error in token", http.StatusInternalServerError)
 		return
@@ -59,7 +59,7 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 	newCookie := http.Cookie{
 		Name:     "Token",
 		Value:    uuidStr,
-		Expires:  time.Now().Add(1 * time.Minute),
+		Expires:  time.Now().Add(1 * time.Hour),
 		HttpOnly: true,
 		Secure:   true,
 	}
@@ -69,19 +69,20 @@ func LoginInfo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func GetUserInfoByLoginInfo(email_users string) (string, string, string, error) {
-	query := `SELECT uname, password FROM users WHERE email = ?`
-	var users, password string
-	err := db.QueryRow(query, email_users).Scan(&users, &password)
+func GetUserInfoByLoginInfo(email_users string) (string, int, string, error) {
+	query := `SELECT id, password FROM users WHERE email = ?`
+	var password string
+	var id int
+	err := db.QueryRow(query, email_users).Scan(&id, &password)
 	if err == nil {
-		return email_users, users, password, nil
+		return email_users, id, password, nil
 	}
-	return "", "", "", errors.New("not exists")
+	return "", -1, "", errors.New("not exists")
 }
 
-func setLoginTime(token, uname string) error {
-	query := "UPDATE users SET token=? WHERE uname=?"
-	_, err := db.Exec(query, token, uname)
+func setLoginTime(token string ,id int) error {
+	query := "UPDATE users SET token=? WHERE id=?"
+	_, err := db.Exec(query, token, id)
 
 	return err
 }

@@ -49,21 +49,24 @@ func filterPosts(category, created, liked string, r *http.Request) ([]POST, erro
 	if e != nil {
 		return []POST{}, e
 	}
-	user, _ := r.Cookie("Token")
-	uname, _ := GetUserNameFromToken(user.Value)
+	user, err := r.Cookie("Token")
+	var user_id int
+	if err == nil {
+		user_id, _ = GetUserNameFromToken(user.Value)
+	}
 	for _, post := range posts {
 		if category != "" && !ElementExists(post.Category, category) {
 			continue
 		}
 
 		if created == "on" {
-			if post.Name != uname {
+			if post.USER_ID != user_id {
 				continue
 			}
 		}
 
 		if liked == "on" {
-			if !IsPostLikedByUser(post.ID, uname) {
+			if !IsPostLikedByUser(post.ID, user_id) {
 				continue
 			}
 		}

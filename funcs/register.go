@@ -9,6 +9,7 @@ import (
 
 type POST struct {
 	ID       int
+	USER_ID  int
 	Name     string
 	Title    string
 	Content  string
@@ -52,7 +53,7 @@ func RegisterIngo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not hash password", http.StatusInternalServerError)
 		return
 	}
-	
+
 	err = InsertUserInfo(email, string(hashedPassword), uname)
 	if err != nil && err != sql.ErrNoRows {
 		err = RegisterT.Execute(w, "user name or email already used")

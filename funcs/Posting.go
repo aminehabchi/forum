@@ -25,7 +25,7 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 	var err error
 	c, _ := r.Cookie("Token")
 
-	uname ,_:= GetUserNameFromToken(c.Value)
+	id ,_:= GetUserNameFromToken(c.Value)
 	title := r.FormValue("title")
 	content := r.FormValue("content")
 	category := r.Form["categories"]
@@ -48,7 +48,7 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = insertPost(uname, title, content, strings.Join(category, " "))
+	err = insertPost(id, title, content, strings.Join(category, " "))
 	if err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return
@@ -57,9 +57,9 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
-func insertPost(uname, title, content, category string) error {
-	selector := `INSERT INTO posts(uname,title,content,category) VALUES (?,?,?,?)`
-	_, err := db.Exec(selector, uname, title, content, category)
+func insertPost(id int, title, content, category string) error {
+	selector := `INSERT INTO posts(title,content,category,user_id) VALUES (?,?,?,?)`
+	_, err := db.Exec(selector, title, content, category,id)
 	if err != nil {
 		return err
 	}
