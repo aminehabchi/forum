@@ -35,6 +35,7 @@ func Createbase() error {
 		content TEXT,
 		category TEXT,
 		user_id INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 	);
 	CREATE TABLE IF NOT EXISTS comments (

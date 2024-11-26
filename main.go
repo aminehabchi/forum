@@ -23,6 +23,8 @@ func main() {
 
 	http.HandleFunc("/", forum.Home)
 
+	http.HandleFunc("/error", forum.ErrorHandler)
+
 	http.HandleFunc("/register", forum.AuthLG(forum.Register))
 	http.HandleFunc("/registerIngo", forum.AuthLG(forum.RegisterIngo))
 
@@ -39,7 +41,7 @@ func main() {
 
 	http.HandleFunc("/like-dislike", forum.Auth(forum.HandleLikeDislike))
 	http.HandleFunc("/filter", forum.FilterHandler)
-
+	
 	fmt.Println("http://localhost:8080/")
 	http.ListenAndServe(":8080", nil)
 }

@@ -1,12 +1,30 @@
+.head {
+  margin-bottom: 30px;
+  border-bottom: 1px solid #212121;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  margin: 5px;
+  font-family: "Beau Rivage", serif;
+  font-size: 45px;
+  font-weight: 700;
+  font-style: normal;
+  text-decoration: none;
+  color: #212121;
+}
+
+
+/********************************/
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  box-sizing: border-box;
 }
 
 .form-container {
@@ -16,6 +34,10 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .myfrom {
@@ -51,7 +73,7 @@ label {
 }
 
 .input[type="submit"] {
-  background-color: #007bff;
+  background-color: #212121;
   color: white;
   padding: 0.75rem;
   border: none;
@@ -62,7 +84,7 @@ label {
 }
 
 .input[type="submit"]:hover {
-  background-color: #0056b3;
+  background-color: #212121;
 }
 
 p {
@@ -70,11 +92,20 @@ p {
   margin-top: 1rem;
 }
 
-a {
-  color: #007bff;
-  text-decoration: none;
-}
 
-a:hover {
-  text-decoration: underline;
+
+/*******************************/
+.btn {
+  color: white;
+  background-color: #212121;
+  font-family: "Beau Rivage", serif;
+  border-radius: 12px;
+  width: 80px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  margin-right: 15px;
+
 }

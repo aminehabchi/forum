@@ -6,7 +6,6 @@ import (
 
 func Auth(funcNext http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		c, err := r.Cookie("Token")
 		if err == nil {
 			_, ok := GetUserNameFromToken(c.Value)

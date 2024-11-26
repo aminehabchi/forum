@@ -1,15 +1,9 @@
 package forum
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 )
-
-func IsPostLikedByUser(postID , user_id int) bool {
-	var existingInteraction int
-	db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", user_id, postID).Scan(&existingInteraction)
-	return existingInteraction == 1
-}
 
 func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -17,29 +11,40 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c, _ := r.Cookie("Token")
-	user_id ,_:= GetUserNameFromToken(c.Value)
-	postID := r.FormValue("post_id")
+	user_id, _ := GetUserNameFromToken(c.Value)
 	action := r.FormValue("action")
 	types := r.FormValue("type")
 	commentid := r.FormValue("commentid")
+
 	if (types != "post" && types != "comment") || (action != "dislike" && action != "like") {
 		http.Error(w, "invalid Type or Action", http.StatusBadRequest)
 		return
 	}
-
 	err := addInteractions(user_id, commentid, action, types)
-
 	if err != nil {
 		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	if types == "post" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	} else {
-		link := fmt.Sprintf("/Comment?post_id=%v", postID)
-		http.Redirect(w, r, link, http.StatusSeeOther)
+	type LikeDislike struct {
+		Like        int `json:"like"`
+		Dislike     int `json:"dislike"`
+		Interaction int `json:"interaction"`
 	}
+	var res LikeDislike
+	if types == "post" {
+		db.QueryRow("SELECT COUNT(*) FROM post_interactions WHERE post_id= ? AND interaction = ?", commentid, 1).Scan(&res.Like)
+		db.QueryRow("SELECT COUNT(*) FROM post_interactions where post_id= ? and interaction = ?", commentid, -1).Scan(&res.Dislike)
+		db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", user_id, commentid).Scan(&res.Interaction)
+
+	} else {
+		db.QueryRow("SELECT COUNT(*) FROM comment_interactions WHERE comment_id= ? AND interaction = ?", commentid, 1).Scan(&res.Like)
+		db.QueryRow("SELECT COUNT(*) FROM comment_interactions where comment_id= ? and interaction = ?", commentid, -1).Scan(&res.Dislike)
+		db.QueryRow("SELECT interaction FROM comment_interactions WHERE user_id = ? AND comment_id = ?", user_id, commentid).Scan(&res.Interaction)
+
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
 }
 
 func addInteractions(user_id int, postID, action, types string) error {
@@ -47,7 +52,7 @@ func addInteractions(user_id int, postID, action, types string) error {
 	var err error
 	if types == "post" {
 		err = db.QueryRow("SELECT interaction FROM post_interactions where post_id= ? and user_id= ?", postID, user_id).Scan(&interaction)
-	}else {
+	} else {
 		err = db.QueryRow("SELECT interaction FROM comment_interactions where comment_id= ? and user_id= ?", postID, user_id).Scan(&interaction)
 	}
 	if err == nil {
@@ -62,7 +67,7 @@ func addInteractions(user_id int, postID, action, types string) error {
 		}
 		if types == "post" {
 			_, err = db.Exec("UPDATE post_interactions SET interaction=? where post_id= ? and user_id= ?", interaction, postID, user_id)
-		}else {
+		} else {
 			_, err = db.Exec("UPDATE comment_interactions SET interaction=? where comment_id= ? and user_id= ?", interaction, postID, user_id)
 		}
 		if err != nil {
@@ -72,8 +77,7 @@ func addInteractions(user_id int, postID, action, types string) error {
 		var selector string
 		if types == "post" {
 			selector = `INSERT INTO post_interactions(user_id,post_id,interaction) VALUES (?,?,?)`
-
-		}else {
+		} else {
 			selector = `INSERT INTO comment_interactions(user_id,comment_id,interaction) VALUES (?,?,?)`
 		}
 		if action == "like" {
@@ -89,4 +93,10 @@ func addInteractions(user_id int, postID, action, types string) error {
 		}
 	}
 	return nil
+}
+
+func LikedDislike(postID string, user_id int) int {
+	var existingInteraction int
+	db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", user_id, postID).Scan(&existingInteraction)
+	return existingInteraction
 }

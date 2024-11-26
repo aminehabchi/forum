@@ -35,7 +35,7 @@
   </header>
   
   <div class="container">
-    <form action="/filter" method="post">
+    <form action="/filter" method="get">
       <div class="filter">
         <select name="category" id="category">
           <option value="">All Categories</option>
@@ -64,22 +64,33 @@
         {{range .Posts}}
         <div class="post">
           <div class="profilInfo">
-            <img src="/static/profil.jpg" class="profileImg">
-            <span>{{.Name}}</span>
+            <img class="profileImg" src="static/profil.png">
+            <div class="profile-details">
+              <span>{{.Name}}</span>
+              <span class="time">{{.CreatedAt}}</span>
+          </div>
           </div>
           <h4>{{.Title}}</h4>
           {{range .Category}}
-          <span class="category"><i class="fas fa-tag"></i> {{.}}</span>
+          <a class="category" href="/filter?category={{.}}"><i class="fas fa-tag"></i> {{.}}</a>
           {{end}}
           <p class="content">{{.Content}}</p>
           <div style="margin-top: 15px;">
-            <a class="action-btn" href="/like-dislike?commentid={{.ID}}&action=like&type=post"><i
-                class="fas fa-thumbs-up"></i>
-              {{.Likes}}</a>
-            <a class="action-btn" href="/like-dislike?commentid={{.ID}}&action=dislike&type=post"><i
-                class="fas fa-thumbs-down"></i>
-              {{.Dislikes}}</a>
-            <a class="action-btn" href="/Comment?post_id={{.ID}}"><i class="fas fa-comment"></i></a>
+            <button class="action-btn likedislikebtn 
+                {{if eq .UserInteraction 1}}liked-btn{{end}}" 
+                data-id="{{.ID}}" data-action="like" data-type="post">
+                <i class="fas fa-thumbs-up"></i>
+                <span id="like_post-{{.ID}}">{{.Likes}}</span>
+            </button>
+            <button class="action-btn likedislikebtn 
+                {{if eq .UserInteraction -1}}liked-btn{{end}}" 
+                data-id="{{.ID}}" data-action="dislike" data-type="post">
+                <i class="fas fa-thumbs-down"></i>
+                <span id="dislike_post-{{.ID}}">{{.Dislikes}}</span>
+            </button>
+            
+            
+            <a class="action-btn" href="/Comment?post_id={{.ID}}"><i class="fas fa-comment"></i>{{.NbComment}}</a>
           </div>
         </div>
         {{end}}
@@ -87,5 +98,7 @@
     </main>
   </div>
 </body>
+
+<script src="/static/index.js"></script>
 
 </html>

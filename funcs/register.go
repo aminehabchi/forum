@@ -7,17 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type POST struct {
-	ID       int
-	USER_ID  int
-	Name     string
-	Title    string
-	Content  string
-	Category []string
-	Likes    int
-	Dislikes int
-}
-
 func Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)

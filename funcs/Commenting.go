@@ -10,19 +10,20 @@ import (
 )
 
 type COMMENT struct {
-	Id       int
-	USER_ID  int
-	Uname    string
-	Content  string
-	Postid   int
-	Likes    int
-	Dislikes int
+	Id              int
+	USER_ID         int
+	Uname           string
+	Content         string
+	Likes           int
+	Dislikes        int
+	UserInteraction int
 }
 
 type data struct {
 	Post     POST
 	COMMENT  []COMMENT
 	ErrorMsg string
+	IsLoggedIn bool
 }
 
 func Commenting(w http.ResponseWriter, r *http.Request) {
@@ -39,10 +40,8 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	if content == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		link := fmt.Sprintf("/Comment?post_id=%v", post_id)
+		link := "/Comment?post_id=" + strconv.Itoa(post_id)
 		http.Redirect(w, r, link, http.StatusSeeOther)
 		return
 	}
@@ -75,13 +74,22 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	Comments, err := GetComment(post_id)
+
+	c, err := r.Cookie("Token")
+	isLoggedIn := err == nil
+	var userID int
+	if isLoggedIn {
+		userID, _ = GetUserNameFromToken(c.Value)
+	}
+
+
+	Comments, err := GetComment(post_id,userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	Data := data{Post: post, COMMENT: Comments}
+	Data := data{Post: post, COMMENT: Comments,IsLoggedIn:isLoggedIn}
 	err = CommentT.Execute(w, Data)
 	if err != nil {
 		http.Error(w, "Could not load template", http.StatusInternalServerError)
@@ -97,8 +105,8 @@ func insertComment(postid, user_id int, content string) error {
 	return nil
 }
 
-func GetComment(id int) ([]COMMENT, error) {
-	rows, err := db.Query("SELECT comments.id,comments.post_id, users.uname, comments.content FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.id DESC", id)
+func GetComment(id,userID int) ([]COMMENT, error) {
+	rows, err := db.Query("SELECT comments.id,users.uname,comments.content FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.id DESC", id)
 	if err != nil {
 		return []COMMENT{}, err
 	}
@@ -107,15 +115,16 @@ func GetComment(id int) ([]COMMENT, error) {
 	var comments []COMMENT
 	for rows.Next() {
 		var content, uname string
-		var id, pid int
-		err := rows.Scan(&id, &pid, &uname, &content)
+		var comment_id int
+		err := rows.Scan(&comment_id, &uname,&content)
 		if err != nil {
 			log.Fatal(err, "err2")
 			return []COMMENT{}, err
 		}
-		comment := COMMENT{Id: id, Postid: pid, Uname: uname, Content: content}
-		comment.Likes = getCommentLikeDisLike(id, 1)
-		comment.Dislikes = getCommentLikeDisLike(id, -1)
+		comment := COMMENT{Id: comment_id, Uname: uname, Content: content}
+		comment.Likes = getCommentLikeDisLike(comment_id, 1)
+		comment.Dislikes = getCommentLikeDisLike(comment_id, -1)
+		db.QueryRow("SELECT interaction FROM comment_interactions WHERE user_id = ? AND comment_id = ?", userID, comment_id).Scan(&comment.UserInteraction)
 		comments = append(comments, comment)
 	}
 

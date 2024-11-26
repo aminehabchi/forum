@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Borel&family=Meow+Script&family=Permanent+Marker&display=swap');
+        body {
+            margin: 0;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .error-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(22, 22, 22, 0.822); 
+            z-index: -1; 
+        }
+
+        .status {
+            font-family: "Borel", cursive;
+            font-size: 36px;
+            font-weight: bold;
+            color: #ECECEC;
+            z-index: 1;
+        }
+
+        .status-text {
+            font-size: 30px;
+            color: #E0E0E0;
+            z-index: 1;
+            font-family: "Borel", cursive;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="static/error.jpg" class="error-image" alt="Error Image">
+        <div class="overlay"></div>
+        <div class="status">{{.Status}}</div>
+        <div class="status-text">{{.StatusText}}</div>
+    </div>
+</body>
+</html>

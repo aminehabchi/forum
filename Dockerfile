@@ -14,16 +14,11 @@ COPY go.mod go.sum ./
 ENV CGO_ENABLED=1
 RUN go mod download
 
-# Copy the rest of the project files
 COPY . .
 
-# Build the app
 RUN go build -o forum .
 
-# Metadata
 LABEL version="0.0.1"
 LABEL projectname="FORUM"
 
-
-# Run the app
 CMD ["./forum"]

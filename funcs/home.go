@@ -15,16 +15,19 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "page not found", 404)
 		return
 	}
-	posts, err := GetPosts()
-	
+
+	c, err := r.Cookie("Token")
+	isLoggedIn := err == nil
+	var userID int
+	if isLoggedIn {
+		userID, _ = GetUserNameFromToken(c.Value)
+	}
+	posts, err := GetPosts(userID)
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
 		return
 	}
-	_, err = r.Cookie("Token")
-	isLoggedIn := err == nil
-
 	data := struct {
 		Posts      []POST
 		IsLoggedIn bool

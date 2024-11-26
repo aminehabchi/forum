@@ -1,0 +1,90 @@
+/**********navbar************/
+body {
+    width: 70%;
+    margin: auto;
+    background-color: #212121;
+    color: #ECECEC;
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    align-items: center;
+    border-bottom: 1px solid gray;
+}
+
+.logo {
+    font-family: "Beau Rivage", serif;
+    font-size: 45px;
+    font-weight: 700;
+    font-style: normal;
+    text-decoration: none;
+    color: #ECECEC;
+}
+
+
+/***************post*********************/
+
+.profilInfo {
+    display: flex;
+    align-items: center;
+}
+
+.profilInfo span {
+    font-family: "Roboto Slab", serif;
+    font-size: 20px;
+}
+
+.profileImg {
+    height: 40px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 12px;
+}
+
+p {
+    font-size: 16px;
+    word-wrap: break-word;
+}
+
+/***********form***********/
+
+.myform {
+    border:1px solid #000000 ;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 5px;
+}
+
+
+textarea {
+    border: none;
+    outline: none;
+    height: 50px;
+    overflow:hidden;
+    color: white;
+    background-color: #212121;
+    padding: 5px;
+}
+
+.input {
+    align-self: self-end;
+    padding: 7px;
+    border-radius: 13px;
+    border: none;
+    background-color: #000000;
+    color: white;
+}
+
+.action-btn.liked-btn {
+    background-color: #4CAF50; 
+    color: white;
+}
+
+.action-btn.disliked-btn {
+    background-color: #F44336;  
+    color: white;
+}

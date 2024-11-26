@@ -6,7 +6,7 @@ import (
 )
 
 func FilterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+	if r.Method != http.MethodGet {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -45,14 +45,16 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 
 func filterPosts(category, created, liked string, r *http.Request) ([]POST, error) {
 	var filteredPosts []POST
-	posts, e := GetPosts()
-	if e != nil {
-		return []POST{}, e
-	}
+
 	user, err := r.Cookie("Token")
 	var user_id int
 	if err == nil {
 		user_id, _ = GetUserNameFromToken(user.Value)
+	}
+
+	posts, e := GetPosts(user_id)
+	if e != nil {
+		return []POST{}, e
 	}
 	for _, post := range posts {
 		if category != "" && !ElementExists(post.Category, category) {
@@ -84,4 +86,10 @@ func ElementExists(arr []string, elem string) bool {
 		}
 	}
 	return false
+}
+
+func IsPostLikedByUser(postID, user_id int) bool {
+	var existingInteraction int
+	db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", user_id, postID).Scan(&existingInteraction)
+	return existingInteraction == 1
 }
