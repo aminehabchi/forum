@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,89 +24,97 @@ type data struct {
 	Post     POST
 	COMMENT  []COMMENT
 	ErrorMsg string
-	IsLoggedIn bool
 }
 
 func Commenting(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+	switch r.Method {
+	case http.MethodGet:
+		post_id, err := strconv.Atoi(r.FormValue("post_id"))
+		if err != nil {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+
+		post, err := getPost(post_id)
+
+		if err != nil && err != sql.ErrNoRows {
+			fmt.Println(post_id)
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+
+		c, err := r.Cookie("Token")
+		isLoggedIn := err == nil
+		var userID int
+		if isLoggedIn {
+			userID, _ = GetUserNameFromToken(c.Value)
+		}
+
+		Comments, err := GetComment(post_id, userID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		Data := data{Post: post, COMMENT: Comments}
+		err = CommentT.Execute(w, Data)
+		if err != nil {
+			http.Error(w, "Could not load template", http.StatusInternalServerError)
+		}
+	case http.MethodPost:
+		c, _ := r.Cookie("Token")
+		user_id, _ := GetUserNameFromToken(c.Value)
+		content := r.FormValue("Content")
+
+		post_id, err := strconv.Atoi(r.FormValue("post_id"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if content == "" {
+			link := "/Commenting?post_id=" + strconv.Itoa(post_id)
+			http.Redirect(w, r, link, http.StatusSeeOther)
+			return
+		}
+
+		var comment_id int
+		comment_id, err = insertComment(post_id, user_id, content)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		type comment struct {
+			Uname   string `json:"uname"`
+			Content string `json:"content"`
+			Id      int    `json:"id"`
+		}
+
+		var res comment
+		db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&res.Uname)
+		res.Content = content
+		res.Id = comment_id
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
+	default:
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
-		return
 	}
-	c, _ := r.Cookie("Token")
-	user_id, _ := GetUserNameFromToken(c.Value)
-	content := r.FormValue("Content")
-
-	post_id, err := strconv.Atoi(r.FormValue("post_id"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if content == "" {
-		link := "/Comment?post_id=" + strconv.Itoa(post_id)
-		http.Redirect(w, r, link, http.StatusSeeOther)
-		return
-	}
-
-	err = insertComment(post_id, user_id, content)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	link := fmt.Sprintf("/Comment?post_id=%v", post_id)
-	http.Redirect(w, r, link, http.StatusSeeOther)
 }
 
-func Comment(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
-		return
-	}
-	post_id, err := strconv.Atoi(r.FormValue("post_id"))
-	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-
-	post, err := getPost(post_id)
-
-	if err != nil && err != sql.ErrNoRows {
-		fmt.Println(post_id)
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
-	c, err := r.Cookie("Token")
-	isLoggedIn := err == nil
-	var userID int
-	if isLoggedIn {
-		userID, _ = GetUserNameFromToken(c.Value)
-	}
-
-
-	Comments, err := GetComment(post_id,userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	Data := data{Post: post, COMMENT: Comments,IsLoggedIn:isLoggedIn}
-	err = CommentT.Execute(w, Data)
-	if err != nil {
-		http.Error(w, "Could not load template", http.StatusInternalServerError)
-	}
-}
-
-func insertComment(postid, user_id int, content string) error {
+func insertComment(postid, user_id int, content string) (int, error) {
 	selector := `INSERT INTO comments(post_id,user_id,content) VALUES (?,?,?)`
-	_, err := db.Exec(selector, postid, user_id, content)
+	result, err := db.Exec(selector, postid, user_id, content)
 	if err != nil {
-		return err
+		return -1, err
 	}
-	return nil
+	commentID, err := result.LastInsertId()
+	if err != nil {
+		return -1, err
+	}
+	return int(commentID), nil
 }
 
-func GetComment(id,userID int) ([]COMMENT, error) {
+func GetComment(id, userID int) ([]COMMENT, error) {
 	rows, err := db.Query("SELECT comments.id,users.uname,comments.content FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.id DESC", id)
 	if err != nil {
 		return []COMMENT{}, err
@@ -116,7 +125,7 @@ func GetComment(id,userID int) ([]COMMENT, error) {
 	for rows.Next() {
 		var content, uname string
 		var comment_id int
-		err := rows.Scan(&comment_id, &uname,&content)
+		err := rows.Scan(&comment_id, &uname, &content)
 		if err != nil {
 			log.Fatal(err, "err2")
 			return []COMMENT{}, err

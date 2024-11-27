@@ -23,22 +23,15 @@ func main() {
 
 	http.HandleFunc("/", forum.Home)
 
-	http.HandleFunc("/load-more-posts", forum.LoadMorePosts)
-
 	http.HandleFunc("/error", forum.ErrorHandler)
 
 	http.HandleFunc("/register", forum.AuthLG(forum.Register))
-	http.HandleFunc("/registerIngo", forum.AuthLG(forum.RegisterIngo))
-
 	http.HandleFunc("/login", forum.AuthLG(forum.Login))
-	http.HandleFunc("/loginInfo", forum.AuthLG(forum.LoginInfo))
-
-	http.HandleFunc("/Posting", forum.Auth(forum.Posting))
-	http.HandleFunc("/PostInfo", forum.Auth(forum.PostInfo))
-
 	http.HandleFunc("/logout", forum.Auth(forum.Logout))
 
-	http.HandleFunc("/Comment", forum.Comment)
+	http.HandleFunc("/Posting", forum.Auth(forum.Posting))
+	http.HandleFunc("/load-more-posts", forum.LoadMorePosts)
+
 	http.HandleFunc("/Commenting", forum.Auth(forum.Commenting))
 
 	http.HandleFunc("/like-dislike", forum.Auth(forum.HandleLikeDislike))

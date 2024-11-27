@@ -29,6 +29,7 @@
                 value=""
                 class="postbtn"
                 formaction="/Posting"
+                formmethod="get"
               />
             </label>
             <label>
@@ -115,7 +116,7 @@
                 <span id="dislike_post-{{.ID}}">{{.Dislikes}}</span>
               </button>
 
-              <a class="action-btn" href="/Comment?post_id={{.ID}}"
+              <a class="action-btn" href="/Commenting?post_id={{.ID}}"
                 ><i class="fas fa-comment"></i>{{.NbComment}}</a
               >
             </div>
@@ -129,5 +130,6 @@
       </main>
     </div>
   </body>
-  <script src="/static/index.js"></script>
+  <script src="/static/like-dislike.js"></script>
+  <script src="/static/post.js"></script>
 </html>

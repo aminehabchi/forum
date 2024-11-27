@@ -1,67 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum - Comment</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/static/comment.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Forum - Comment</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="/static/comment.css" />
-</head>
+  <body>
+    <header class="head">
+      <a class="logo" href="/">Forum</a>
+    </header>
 
-<body>
-  <header class="head">
-    <a class="logo" href="/">Forum</a>
-  </header>
-
-
-  <div class="container">
-
-    <div class="post-container">
-
-      <div class="post">
-        <div class="profilInfo">
-          <img src="/static/profil.jpg" class="profileImg">
-          <span>{{.Post.Name}}</span>
+    <div class="container">
+      <div class="post-container">
+        <div class="post">
+          <div class="profilInfo">
+            <img src="/static/profil.png" class="profileImg" />
+            <span>{{.Post.Name}}</span>
+          </div>
+          <h3>{{.Post.Title}}</h3>
+          <p>{{.Post.Content}}</p>
         </div>
-        <h3>{{.Post.Title}}</h3>
-        <p>{{.Post.Content}}</p>
-      </div>
 
+        <form
+          class="myform"
+          action="/Commenting"
+          method="post"
+          id="commentForm"
+        >
+          {{if .ErrorMsg}}
+          <p style="font-size: 1.2rem; margin-bottom: 5px; color: red">
+            {{.ErrorMsg}}
+          </p>
+          {{end}}
+          <textarea
+            name="Content"
+            placeholder="Enter your comment..."
+            required
+          ></textarea>
+          <input type="hidden" name="post_id" value="{{.Post.ID}}" />
+          <input class="input btn" type="submit" value="Comment" />
+        </form>
 
-      <form class="myform" action="/Commenting" method="post">
-        {{if .ErrorMsg}}
-        <p style="font-size: 1.2rem; margin-bottom: 5px; color: red">
-          {{.ErrorMsg}}
-        </p>
-        {{end}}
-        <textarea name="Content" placeholder="Enter your comment..." required></textarea>
-        <input type="hidden" name="post_id" value="{{.Post.ID}}" />
-        <input class="input btn" type="submit" value="Comment" />
-      </form>
+        <div class="comments-section">
+          <h2>Comments</h2>
+          <div id="commentsContainer">
+            {{range .COMMENT}}
+            <div class="comment">
+              <h3>{{.Uname}}</h3>
+              <p>{{.Content}}</p>
 
-
-      <div class="comments-section">
-        <h2>Comments</h2>
-        {{range .COMMENT}}
-        <div class="comment">
-          <h3>{{.Uname}}</h3>
-          <p>{{.Content}}</p>
-
-          <button class="action-btn likedislikebtn {{if eq .UserInteraction 1}}liked-btn{{end}}" data-id="{{.Id}}"
-            data-action="like" data-type="comment"><i class="fas fa-thumbs-up"></i>
-            <span id="like_post-{{.Id}}">{{.Likes}}</span></button>
-          <button class="action-btn likedislikebtn {{if eq .UserInteraction -1}}disliked-btn{{end}}" data-id="{{.Id}}"
-            data-action="dislike" data-type="comment"><i class="fas fa-thumbs-down"></i>
-            <span id="dislike_post-{{.Id}}">{{.Dislikes}}</span></button>
+              <button
+                class="action-btn likedislikebtn {{if eq .UserInteraction 1}}liked-btn{{end}}"
+                data-id="{{.Id}}"
+                data-action="like"
+                data-type="comment"
+              >
+                <i class="fas fa-thumbs-up"></i>
+                <span id="like_post-{{.Id}}">{{.Likes}}</span>
+              </button>
+              <button
+                class="action-btn likedislikebtn {{if eq .UserInteraction -1}}disliked-btn{{end}}"
+                data-id="{{.Id}}"
+                data-action="dislike"
+                data-type="comment"
+              >
+                <i class="fas fa-thumbs-down"></i>
+                <span id="dislike_post-{{.Id}}">{{.Dislikes}}</span>
+              </button>
+            </div>
+            {{end}}
+          </div>
         </div>
-        {{end}}
-
       </div>
     </div>
-  </div>
-</body>
-
-<script src="/static/index.js"></script>
-
+  </body>
+  <script src="/static/like-dislike.js"></script>
+  <script src="/static/comment.js"></script>
 </html>
