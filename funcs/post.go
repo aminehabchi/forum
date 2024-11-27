@@ -19,8 +19,9 @@ type POST struct {
 	UserInteraction int
 }
 
-func GetPosts(userID int) ([]POST, error) {
-	rows, err := db.Query("SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC")
+func GetPosts(userID int, offset, limit int) ([]POST, error) {
+
+	rows, err := db.Query("SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -73,3 +74,4 @@ func getCommentLikeDisLike(comment_id, inter int) int {
 	}
 	return count
 }
+

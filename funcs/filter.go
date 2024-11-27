@@ -15,7 +15,7 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	created := r.FormValue("created")
 	liked := r.FormValue("liked")
 
-	filteredPosts, err := filterPosts(category, created, liked, r)
+	filteredPosts, err := filterPosts(category, created, liked, r, 0, 3)
 	if err == sql.ErrNoRows {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
@@ -31,10 +31,16 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 		Posts      []POST
 		IsLoggedIn bool
 		Categories []string
+		Filter     map[string]string
 	}{
 		Posts:      filteredPosts,
 		IsLoggedIn: isLoggedIn,
 		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
+		Filter: map[string]string{
+			"category": category,
+			"created":  created,
+			"liked":    liked,
+		},
 	}
 	err = HomeT.Execute(w, data)
 	if err != nil {
@@ -43,7 +49,7 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func filterPosts(category, created, liked string, r *http.Request) ([]POST, error) {
+func filterPosts(category, created, liked string, r *http.Request, offset, limit int) ([]POST, error) {
 	var filteredPosts []POST
 
 	user, err := r.Cookie("Token")
@@ -52,7 +58,8 @@ func filterPosts(category, created, liked string, r *http.Request) ([]POST, erro
 		user_id, _ = GetUserNameFromToken(user.Value)
 	}
 
-	posts, e := GetPosts(user_id)
+	posts, e := GetPosts(user_id, offset, limit)
+
 	if e != nil {
 		return []POST{}, e
 	}

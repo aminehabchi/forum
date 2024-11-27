@@ -1,104 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Forum</title>
+    <meta name="filter-category" content="{{.Filter.category}}" />
+    <meta name="filter-created" content="{{.Filter.created}}" />
+    <meta name="filter-liked" content="{{.Filter.liked}}" />
+    <link rel="stylesheet" href="/static/home.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modern Forum</title>
-  <link rel="stylesheet" href="/static/home.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-</head>
-
-<body>
-  <header class="head">
-    <a class="logo" href="/">Forum</a>
-    <div>
-      {{if .IsLoggedIn}}
-      <form method="post">
-        <div class="rightBtns">
-          <label>
-            <i class="fa-regular fa-pen-to-square"></i>
-            <input type="submit" name="pst" value="" class="postbtn" formaction="/Posting" />
-          </label>
-          <label>
-            <i class="fa-solid fa-power-off"></i>
-            <input type="submit" name="logout" value="" class="postbtn" formaction="/logout" />
-          </label>
-        </div>
-
-      </form>
-      {{else}}
-      <a class="btn btn1" style="margin-right: 10px;" href="/login">Login</a>
-      <a class="btn btn2" href="/register">Register</a>
-      {{end}}
-    </div>
-  </header>
-  
-  <div class="container">
-    <form action="/filter" method="get">
-      <div class="filter">
-        <select name="category" id="category">
-          <option value="">All Categories</option>
-          {{range .Categories}}
-          <option value="{{.}}">{{.}}</option>
-          {{end}}
-        </select>
+  <body>
+    <header class="head">
+      <a class="logo" href="/">Forum</a>
+      <div>
         {{if .IsLoggedIn}}
-        <label>
-          <input type="checkbox"  name="created" />
-          <span>My Posts</span>
-        </label>
-        <label >
-          <input type="checkbox" name="liked" />
-          <span>Liked Posts</span> 
-        </label>
+        <form method="post">
+          <div class="rightBtns">
+            <label>
+              <i class="fa-regular fa-pen-to-square"></i>
+              <input
+                type="submit"
+                name="pst"
+                value=""
+                class="postbtn"
+                formaction="/Posting"
+              />
+            </label>
+            <label>
+              <i class="fa-solid fa-power-off"></i>
+              <input
+                type="submit"
+                name="logout"
+                value=""
+                class="postbtn"
+                formaction="/logout"
+              />
+            </label>
+          </div>
+        </form>
+        {{else}}
+        <a class="btn btn1" style="margin-right: 10px" href="/login">Login</a>
+        <a class="btn btn2" href="/register">Register</a>
         {{end}}
-        <button type="submit" class="apply-btn">
-          <i class="fas fa-check-circle"></i> Apply
-        </button>
       </div>
-    </form>
-    <!-- Main content -->
-    <main class="main-content">
-      <div class="Posts">
-        {{range .Posts}}
-        <div class="post">
-          <div class="profilInfo">
-            <img class="profileImg" src="static/profil.png">
-            <div class="profile-details">
-              <span>{{.Name}}</span>
-              <span class="time">{{.CreatedAt}}</span>
-          </div>
-          </div>
-          <h4>{{.Title}}</h4>
-          {{range .Category}}
-          <a class="category" href="/filter?category={{.}}"><i class="fas fa-tag"></i> {{.}}</a>
+    </header>
+
+    <div class="container">
+      <form action="/filter" method="get">
+        <div class="filter">
+          <select name="category" id="category">
+            <option value="">All Categories</option>
+            {{range .Categories}}
+            <option value="{{.}}">{{.}}</option>
+            {{end}}
+          </select>
+          {{if .IsLoggedIn}}
+          <label>
+            <input type="checkbox" name="created" />
+            <span>My Posts</span>
+          </label>
+          <label>
+            <input type="checkbox" name="liked" />
+            <span>Liked Posts</span>
+          </label>
           {{end}}
-          <p class="content">{{.Content}}</p>
-          <div style="margin-top: 15px;">
-            <button class="action-btn likedislikebtn 
-                {{if eq .UserInteraction 1}}liked-btn{{end}}" 
-                data-id="{{.ID}}" data-action="like" data-type="post">
+          <button type="submit" class="apply-btn">
+            <i class="fas fa-check-circle"></i> Apply
+          </button>
+        </div>
+      </form>
+      <!-- Main content -->
+      <main class="main-content">
+        <div class="Posts" id="postsContainer">
+          {{range .Posts}}
+          <div class="post">
+            <div class="profilInfo">
+              <img class="profileImg" src="static/profil.png" />
+              <div class="profile-details">
+                <span>{{.Name}}</span>
+                <span class="time">{{.CreatedAt}}</span>
+              </div>
+            </div>
+            <h4>{{.Title}}</h4>
+            {{range .Category}}
+            <a class="category" href="/filter?category={{.}}"
+              ><i class="fas fa-tag"></i> {{.}}</a
+            >
+            {{end}}
+            <p class="content">{{.Content}}</p>
+            <div style="margin-top: 15px">
+              <button
+                class="action-btn likedislikebtn 
+                {{if eq .UserInteraction 1}}liked-btn{{end}}"
+                data-id="{{.ID}}"
+                data-action="like"
+                data-type="post"
+              >
                 <i class="fas fa-thumbs-up"></i>
                 <span id="like_post-{{.ID}}">{{.Likes}}</span>
-            </button>
-            <button class="action-btn likedislikebtn 
-                {{if eq .UserInteraction -1}}liked-btn{{end}}" 
-                data-id="{{.ID}}" data-action="dislike" data-type="post">
+              </button>
+              <button
+                class="action-btn likedislikebtn 
+                {{if eq .UserInteraction -1}}liked-btn{{end}}"
+                data-id="{{.ID}}"
+                data-action="dislike"
+                data-type="post"
+              >
                 <i class="fas fa-thumbs-down"></i>
                 <span id="dislike_post-{{.ID}}">{{.Dislikes}}</span>
-            </button>
-            
-            
-            <a class="action-btn" href="/Comment?post_id={{.ID}}"><i class="fas fa-comment"></i>{{.NbComment}}</a>
+              </button>
+
+              <a class="action-btn" href="/Comment?post_id={{.ID}}"
+                ><i class="fas fa-comment"></i>{{.NbComment}}</a
+              >
+            </div>
           </div>
+          {{end}}
         </div>
-        {{end}}
-      </div>
-    </main>
-  </div>
-</body>
-
-<script src="/static/index.js"></script>
-
+        <div class="loading" id="loadingContainer">
+          <div class="spinner"></div>
+          Loading more posts...
+        </div>
+      </main>
+    </div>
+  </body>
+  <script src="/static/index.js"></script>
 </html>

@@ -1,7 +1,11 @@
 package forum
 
 import (
+	"database/sql"
+	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -25,7 +29,7 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 	var err error
 	c, _ := r.Cookie("Token")
 
-	id ,_:= GetUserNameFromToken(c.Value)
+	id, _ := GetUserNameFromToken(c.Value)
 	title := r.FormValue("title")
 	content := r.FormValue("content")
 	category := r.Form["categories"]
@@ -59,7 +63,7 @@ func PostInfo(w http.ResponseWriter, r *http.Request) {
 
 func insertPost(id int, title, content, category string) error {
 	selector := `INSERT INTO posts(title,content,category,user_id) VALUES (?,?,?,?)`
-	_, err := db.Exec(selector, title, content, category,id)
+	_, err := db.Exec(selector, title, content, category, id)
 	if err != nil {
 		return err
 	}
@@ -74,4 +78,28 @@ func CategoryFilter(categories []string) bool {
 		}
 	}
 	return true
+}
+
+func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	offset, _ := strconv.Atoi(r.FormValue("offset"))
+	category := r.FormValue("category")
+	created := r.FormValue("created")
+	liked := r.FormValue("liked")
+
+	// fmt.Println(offset, "c",category, "cr",created, "l",liked)
+
+	filteredPosts, err := filterPosts(category, created, liked, r, offset, 3)
+	if err != nil && err != sql.ErrNoRows {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Println("Error getting posts:", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(filteredPosts)
 }

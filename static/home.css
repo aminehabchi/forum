@@ -1,211 +1,237 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #212121;
-    color: #ECECEC;
-    width: 70%;
-    margin: auto;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background-color: #212121;
+  color: #ececec;
+  width: 70%;
+  margin: auto;
 }
 
-
 .action-btn.liked-btn {
-    background-color: white; 
-    color: black;
+  background-color: white;
+  color: black;
 }
 
 .head {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    align-items: center;
-    border-bottom: 1px solid gray;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  align-items: center;
+  border-bottom: 1px solid gray;
 }
 
 .logo {
-    font-family: "Beau Rivage", serif;
-    font-size: 45px;
-    font-weight: 700;
-    font-style: normal;
-    text-decoration: none;
-    color: #ECECEC;
+  font-family: "Beau Rivage", serif;
+  font-size: 45px;
+  font-weight: 700;
+  font-style: normal;
+  text-decoration: none;
+  color: #ececec;
 }
 
-
 .head .btn {
-    text-decoration: none;
-    border: 1px solid gray;
-    font-weight: 400;
-    color: white;
-    font-family: "Beau Rivage", serif;
-    padding: 5px 10px;
-    border-radius: 18px;
-    font-size: 18px;
-    transition: 0.1s;
+  text-decoration: none;
+  border: 1px solid gray;
+  font-weight: 400;
+  color: white;
+  font-family: "Beau Rivage", serif;
+  padding: 5px 10px;
+  border-radius: 18px;
+  font-size: 18px;
+  transition: 0.1s;
 }
 
 .head .btn1 {
-    border: none;
-    background-color: #E0E0E0;
-    color: black;
+  border: none;
+  background-color: #e0e0e0;
+  color: black;
 }
 
 .head .btn2:hover {
-    background-color: rgb(75, 75, 75);
-    color: white;
+  background-color: rgb(75, 75, 75);
+  color: white;
 }
 
 .filter {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .filter input {
-    display: none;
+  display: none;
 }
 
-.filter span{
-    background-color: #2F2F2F;
-    padding: 7px;
-    cursor: pointer;
-    font-size: 15px;
+.filter span {
+  background-color: #2f2f2f;
+  padding: 7px;
+  cursor: pointer;
+  font-size: 15px;
 }
 
 .filter select {
-    padding: 6px;
-    font-size: 15px;
-    background-color:#2F2F2F ;
-    color: white;
-    border: none;
+  padding: 6px;
+  font-size: 15px;
+  background-color: #2f2f2f;
+  color: white;
+  border: none;
 }
 
-.filter input:checked + span{
-    background-color: #ECECEC;
-    color: black;
+.filter input:checked + span {
+  background-color: #ececec;
+  color: black;
 }
 
 .apply-btn {
-    padding: 2px;
-    cursor: pointer;
+  padding: 2px;
+  cursor: pointer;
 }
 
 .main-content {
-    width: 100%;
-    padding: 40px;
-    transition: margin-left 0.3s ease;
-    border-radius: 10px;
+  width: 100%;
+  padding: 40px;
+  transition: margin-left 0.3s ease;
+  border-radius: 10px;
 }
 
 .profilInfo {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .profile-details {
-    display: flex;
-    flex-direction: column;
-    font-family: "Roboto Slab", serif;
+  display: flex;
+  flex-direction: column;
+  font-family: "Roboto Slab", serif;
 }
 
 .profilInfo span:nth-child(1) {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .profileImg {
-    height: 40px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 12px;
-} 
-
-.post h4 {
-    margin: 8px 8px 5px 8px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 12px;
 }
 
+.post h4 {
+  margin: 8px 8px 5px 8px;
+}
 
 .Posts {
-    display: grid;
-    gap: 8px;
+  display: grid;
+  gap: 8px;
 }
 
 .post {
-    background-color: #2F2F2F;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    overflow:auto;
+  background-color: #2f2f2f;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: auto;
 }
 
 .time {
-    font-size: 13px; 
-    color: #888; 
-    font-style: italic; 
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
 }
-  
-  
-
 
 .category {
-    font-size: 14px;
-    color: #999;
-    margin-bottom: 15px;
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 15px;
 }
 
 .content {
-    font-size: 16px;
-    margin: 10px;
+  font-size: 16px;
+  margin: 10px;
 }
 
 .action-btn {
-    text-decoration: none;
-    background-color: #0000004d;
-    padding: 10px;
-    border-radius: 30px;
-    color: #ECECEC;
-    transition: background-color 0.3s ease;
-    margin: 5px;
-    cursor: pointer;
-    display: inline-flex;
-    width: 50px;
-    text-align: center;
-    border: none;
-    gap: 5px;
+  text-decoration: none;
+  background-color: #0000004d;
+  padding: 10px;
+  border-radius: 30px;
+  color: #ececec;
+  transition: background-color 0.3s ease;
+  margin: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  width: 50px;
+  text-align: center;
+  border: none;
+  gap: 5px;
 }
 
 .rightBtns {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
-.rightBtns label{
-    font-size: 22px;
-    cursor: pointer;
+.rightBtns label {
+  font-size: 22px;
+  cursor: pointer;
 }
 
 .rightBtns label:nth-child(1) {
-    margin-right: 35px;
+  margin-right: 35px;
 }
 
 .postbtn {
-    display: none;
+  display: none;
 }
 
+/* -------Loader------ */
+
+.loading {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 5px;
+  visibility: hidden;
+}
+
+.spinner {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----end----- */
+
 @media (max-width: 600px) {
-    body{
-        width: 100%;
-        padding: 5px;
-    }
-    .main-content {
-        padding: 10px;
-    }
-    .filter {
-        padding: 10px;
-    }
+  body {
+    width: 100%;
+    padding: 5px;
+  }
+  .main-content {
+    padding: 10px;
+  }
+  .filter {
+    padding: 10px;
+  }
 }
