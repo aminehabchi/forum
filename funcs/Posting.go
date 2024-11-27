@@ -3,10 +3,9 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 func Posting(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +42,7 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = insertPost(id, title, content, strings.Join(category, " "))
+		err = insertPost(id, title, content, category)
 		if err != nil {
 			http.Error(w, "Failed to create post", http.StatusInternalServerError)
 			return
@@ -55,9 +54,9 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func insertPost(id int, title, content, category string) error {
-	selector := `INSERT INTO posts(title,content,category,user_id) VALUES (?,?,?,?)`
-	_, err := db.Exec(selector, title, content, category, id)
+func insertPost(id int, title, content string, category []string) error {
+	selector := `INSERT INTO posts(title,content,user_id) VALUES (?,?,?)`
+	_, err := db.Exec(selector, title, content, id)
 	if err != nil {
 		return err
 	}
@@ -65,9 +64,14 @@ func insertPost(id int, title, content, category string) error {
 }
 
 func CategoryFilter(categories []string) bool {
-	allCategories := []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"}
+	allCategories := make(map[string]bool)
+
+	arr := []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"}
+	for _, v := range arr {
+		allCategories[v] = true
+	}
 	for _, v := range categories {
-		if !ElementExists(allCategories, v) {
+		if !allCategories[v] {
 			return false
 		}
 	}
@@ -80,20 +84,24 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset, _ := strconv.Atoi(r.FormValue("offset"))
-	category := r.FormValue("category")
-	created := r.FormValue("created")
-	liked := r.FormValue("liked")
+	offset := r.FormValue("offset")
 
-	// fmt.Println(offset, "c",category, "cr",created, "l",liked)
+	user, err := r.Cookie("Token")
 
-	filteredPosts, err := filterPosts(category, created, liked, r, offset, 3)
+	var user_id int
+	if err == nil {
+		user_id, _ = GetUserNameFromToken(user.Value)
+	}
+	
+	quert := "SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT 3 OFFSET "+offset
+	
+	posts, err := Get_Posts(user_id, quert)
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
 		return
 	}
-
+	fmt.Println(len(posts), err)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(filteredPosts)
+	json.NewEncoder(w).Encode(posts)
 }

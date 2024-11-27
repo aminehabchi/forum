@@ -1,98 +1,11 @@
 package forum
 
 import (
-	"database/sql"
 	"net/http"
 )
 
 func FilterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
-		return
-	}
 
-	category := r.FormValue("category")
-	created := r.FormValue("created")
-	liked := r.FormValue("liked")
-
-	filteredPosts, err := filterPosts(category, created, liked, r, 0, 3)
-	if err == sql.ErrNoRows {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	if err != nil {
-		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
-		return
-	}
-	_, err = r.Cookie("Token")
-	isLoggedIn := err == nil
-
-	data := struct {
-		Posts      []POST
-		IsLoggedIn bool
-		Categories []string
-		Filter     map[string]string
-	}{
-		Posts:      filteredPosts,
-		IsLoggedIn: isLoggedIn,
-		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
-		Filter: map[string]string{
-			"category": category,
-			"created":  created,
-			"liked":    liked,
-		},
-	}
-	err = HomeT.Execute(w, data)
-	if err != nil {
-		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
-		return
-	}
-}
-
-func filterPosts(category, created, liked string, r *http.Request, offset, limit int) ([]POST, error) {
-	var filteredPosts []POST
-
-	user, err := r.Cookie("Token")
-	var user_id int
-	if err == nil {
-		user_id, _ = GetUserNameFromToken(user.Value)
-	}
-
-	posts, e := GetPosts(user_id, offset, limit)
-
-	if e != nil {
-		return []POST{}, e
-	}
-	for _, post := range posts {
-		if category != "" && !ElementExists(post.Category, category) {
-			continue
-		}
-
-		if created == "on" {
-			if post.USER_ID != user_id {
-				continue
-			}
-		}
-
-		if liked == "on" {
-			if !IsPostLikedByUser(post.ID, user_id) {
-				continue
-			}
-		}
-
-		filteredPosts = append(filteredPosts, post)
-	}
-
-	return filteredPosts, nil
-}
-
-func ElementExists(arr []string, elem string) bool {
-	for _, v := range arr {
-		if v == elem {
-			return true
-		}
-	}
-	return false
 }
 
 func IsPostLikedByUser(postID, user_id int) bool {

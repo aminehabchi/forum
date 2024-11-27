@@ -2,12 +2,6 @@ let offset = 3
 let loading = false
 let noMorePosts = false
 
-const filterParams = {
-    category: document.querySelector('meta[name="filter-category"]')?.content || '',
-    created: document.querySelector('meta[name="filter-created"]')?.content || '',
-    liked: document.querySelector('meta[name="filter-liked"]')?.content || ''
-};
-
 function loadMorePosts() {
     if (loading || noMorePosts) return;
 
@@ -16,9 +10,6 @@ function loadMorePosts() {
 
     const url = new URL('/load-more-posts', window.location.origin);
     url.searchParams.set('offset', offset);
-    url.searchParams.set('category', filterParams.category);
-    url.searchParams.set('created', filterParams.created);
-    url.searchParams.set('liked', filterParams.liked);
 
     fetch(url)
         .then(resp => resp.json())
@@ -58,11 +49,6 @@ function createPostElement(post) {
             </div>
         </div>
         <h4>${post.Title}</h4>
-        ${post.Category.map(cat => `
-            <a class="category" href="/filter?category=${cat}">
-                <i class="fas fa-tag"></i> ${cat}
-            </a>
-        `).join('')}
         <p class="content">${post.Content}</p>
         <div style="margin-top: 15px;">
             <button class="action-btn likedislikebtn ${post.UserInteraction === 1 ? 'liked-btn' : ''}"

@@ -22,7 +22,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	if isLoggedIn {
 		userID, _ = GetUserNameFromToken(c.Value)
 	}
-	posts, err := GetPosts(userID, 0, 3)
+	posts, err := Get_Posts(userID, "SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT 3 OFFSET 0")
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
@@ -32,16 +32,10 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		Posts      []POST
 		IsLoggedIn bool
 		Categories []string
-		Filter     map[string]string
 	}{
 		Posts:      posts,
 		IsLoggedIn: isLoggedIn,
 		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
-		Filter: map[string]string{
-			"category": "",
-			"created":  "",
-			"liked":    "",
-		},
 	}
 
 	err = HomeT.Execute(w, data)

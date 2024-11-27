@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"strings"
 	"time"
 )
 
@@ -19,20 +18,21 @@ type POST struct {
 	UserInteraction int
 }
 
-func GetPosts(userID int, offset, limit int) ([]POST, error) {
-
-	rows, err := db.Query("SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT ? OFFSET ?", limit, offset)
+// SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT ? OFFSET ?", limit, offset
+func Get_Posts(userID int, Query string) ([]POST, error) {
+	rows, err := db.Query(Query)
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var posts []POST
 	for rows.Next() {
 		var p POST
-		var str_categories string
+
 		var timeCreated time.Time
-		err := rows.Scan(&p.ID, &p.USER_ID, &p.Title, &timeCreated, &p.Content, &str_categories, &p.Name)
+		err := rows.Scan(&p.ID, &p.USER_ID, &p.Title, &timeCreated, &p.Content, &p.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -41,7 +41,6 @@ func GetPosts(userID int, offset, limit int) ([]POST, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.Category = strings.Split(str_categories, " ")
 		p.Likes = getPostLikeDisLike(p.ID, 1)
 		p.Dislikes = getPostLikeDisLike(p.ID, -1)
 		p.CreatedAt = timeCreated.Format("Jan 2, 2006 at 3:04")
@@ -74,4 +73,3 @@ func getCommentLikeDisLike(comment_id, inter int) int {
 	}
 	return count
 }
-
