@@ -49,29 +49,20 @@
     </header>
 
     <div class="container">
-      <form action="/filter" method="get">
+      <div id="filterContainer">
         <div class="filter">
-          <select name="category" id="category">
-            <option value="">All Categories</option>
-            {{range .Categories}}
-            <option value="{{.}}">{{.}}</option>
-            {{end}}
-          </select>
           {{if .IsLoggedIn}}
           <label>
-            <input type="checkbox" name="created" />
+            <input type="checkbox" class="filteraction" name="created" />
             <span>My Posts</span>
           </label>
           <label>
-            <input type="checkbox" name="liked" />
+            <input type="checkbox" class="filteraction" name="liked" />
             <span>Liked Posts</span>
           </label>
           {{end}}
-          <button type="submit" class="apply-btn">
-            <i class="fas fa-check-circle"></i> Apply
-          </button>
         </div>
-      </form>
+      </div>
       <!-- Main content -->
       <main class="main-content">
         <div class="Posts" id="postsContainer">

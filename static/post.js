@@ -78,3 +78,14 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 1.0 })
 
 observer.observe(loadingContainer)
+
+filterContainer.addEventListener("click", (e) => {
+    const action = e.target.closest(".filteraction")
+    if (action) {
+        filterCategory(action.name);
+    }
+})
+
+function filterCategory(action) {
+    fetch(`/filter?type=${action}`)
+}
