@@ -18,7 +18,6 @@ type POST struct {
 	UserInteraction int
 }
 
-// SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT ? OFFSET ?", limit, offset
 func Get_Posts(userID int, Query string) ([]POST, error) {
 	rows, err := db.Query(Query)
 	if err != nil {

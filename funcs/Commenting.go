@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 type COMMENT struct {
@@ -34,8 +33,12 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
-
-		post, err := getPost(post_id)
+		Cookie, _ := r.Cookie("Token")
+		user_id, _ := GetUserNameFromToken(Cookie.Value)
+		post, err := Get_Posts(user_id, `
+		SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
+		JOIN users ON posts.user_id = users.id
+		WHERE posts.user_id=`+strconv.Itoa(user_id))
 
 		if err != nil && err != sql.ErrNoRows {
 			fmt.Println(post_id)
@@ -56,7 +59,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		Data := data{Post: post, COMMENT: Comments}
+		Data := data{Post: post[0], COMMENT: Comments}
 		err = CommentT.Execute(w, Data)
 		if err != nil {
 			http.Error(w, "Could not load template", http.StatusInternalServerError)
@@ -143,17 +146,4 @@ func GetComment(id, userID int) ([]COMMENT, error) {
 		return []COMMENT{}, err
 	}
 	return comments, nil
-}
-
-func getPost(id int) (POST, error) {
-	query := `SELECT posts.id, posts.title, posts.content, posts.category,users.uname FROM posts JOIN users ON posts.user_id = users.id WHERE posts.id = ?`
-	var post POST
-	var str string
-	err := db.QueryRow(query, id).Scan(&post.ID, &post.Title, &post.Content, &str, &post.Name)
-	if err != nil {
-		fmt.Println(err)
-		return POST{}, err
-	}
-	post.Category = strings.Split(str, " ")
-	return post, nil
 }
