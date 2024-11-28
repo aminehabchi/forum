@@ -30,23 +30,27 @@ func Get_Posts(userID int, Query string) ([]POST, error) {
 	var posts []POST
 	for rows.Next() {
 		var p POST
-
 		var timeCreated time.Time
+
 		err := rows.Scan(&p.ID, &p.USER_ID, &p.Title, &timeCreated, &p.Content, &p.Name)
 		if err != nil {
 			return nil, err
 		}
 		err = db.QueryRow("SELECT COUNT(*) FROM posts JOIN comments ON posts.id = comments.post_id WHERE posts.id = ? ", p.ID).Scan(&p.NbComment)
-
 		if err != nil {
 			return nil, err
 		}
 		p.Likes = getPostLikeDisLike(p.ID, 1)
 		p.Dislikes = getPostLikeDisLike(p.ID, -1)
 		p.CreatedAt = timeCreated.Format("Jan 2, 2006 at 3:04")
-
 		db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", userID, p.ID).Scan(&p.UserInteraction)
 
+		rowsCategory, _ := db.Query("SELECT category FROM post_categories WHERE post_categories.post_id=?", p.ID)
+		for rowsCategory.Next() {
+			var category string
+			rowsCategory.Scan(&category)
+			p.Category = append(p.Category, category)
+		}
 		posts = append(posts, p)
 	}
 	return posts, nil

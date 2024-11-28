@@ -3,10 +3,11 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
+
+var allCategories map[string]bool
 
 func Posting(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -54,22 +55,22 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func insertPost(id int, title, content string, category []string) error {
+func insertPost(id int, title, content string, categories []string) error {
 	selector := `INSERT INTO posts(title,content,user_id) VALUES (?,?,?)`
-	_, err := db.Exec(selector, title, content, id)
+	a, err := db.Exec(selector, title, content, id)
 	if err != nil {
 		return err
+	}
+	idPost, _ := a.LastInsertId()
+
+	for _, category := range categories {
+		selector = `INSERT INTO post_categories(post_id,category) VALUES (?,?)`
+		_, _ = db.Exec(selector, idPost, category)
 	}
 	return nil
 }
 
 func CategoryFilter(categories []string) bool {
-	allCategories := make(map[string]bool)
-
-	arr := []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"}
-	for _, v := range arr {
-		allCategories[v] = true
-	}
 	for _, v := range categories {
 		if !allCategories[v] {
 			return false
@@ -92,16 +93,16 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		user_id, _ = GetUserNameFromToken(user.Value)
 	}
-	
-	quert := "SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT 3 OFFSET "+offset
-	
+
+	quert := "SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT 3 OFFSET " + offset
+
 	posts, err := Get_Posts(user_id, quert)
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
 		return
 	}
-	fmt.Println(len(posts), err)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }

@@ -9,6 +9,11 @@ import (
 var db *sql.DB
 
 func Createbase() error {
+	allCategories = make(map[string]bool)
+	arr := []string{"Created", "Liked", "General",  "News", "Entertainment", "Hobbies", "Lifestyle"}
+	for _, v := range arr {
+		allCategories[v] = true
+	}
 	var err error
 	db, err = sql.Open("sqlite3", "./database.db")
 	if err != nil {
@@ -37,16 +42,10 @@ func Createbase() error {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
-    CREATE TABLE IF NOT EXISTS categories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name VARCHAR(255) NOT NULL UNIQUE
-    );
     CREATE TABLE IF NOT EXISTS post_categories (
-           post_id INTEGER NOT NULL,
-        category_id INTEGER NOT NULL,
-        PRIMARY KEY (post_id, category_id),
-        FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+        post_id INTEGER NOT NULL,
+       	category VARCHAR(255) NOT NULL,
+        FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
     );
     CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
