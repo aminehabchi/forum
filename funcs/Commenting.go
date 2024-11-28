@@ -3,7 +3,6 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,55 +27,61 @@ type data struct {
 func Commenting(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		post_id, err := strconv.Atoi(r.FormValue("post_id"))
-		if err != nil {
+		post_id, _ := strconv.Atoi(r.FormValue("post_id"))
+		if post_id == 0 {
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
-		Cookie, _ := r.Cookie("Token")
-		user_id, _ := GetUserNameFromToken(Cookie.Value)
-		post, err := Get_Posts(user_id, `
+
+		var user_id int
+		Cookie, err := r.Cookie("Token")
+		isLoggedIn := err == nil
+		if isLoggedIn {
+			user_id, _ = GetUserNameFromToken(Cookie.Value)
+		}
+
+		Posts, err := Get_Posts(user_id, `
 		SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
 		JOIN users ON posts.user_id = users.id
-		WHERE posts.user_id=`+strconv.Itoa(user_id)+` and posts.id=`+r.FormValue("post_id"))
-
-		if err != nil && err != sql.ErrNoRows {
-			fmt.Println(post_id)
+		WHERE posts.id=`+r.FormValue("post_id"))
+		if err == sql.ErrNoRows {
+			http.Error(w, "bad request1", http.StatusBadRequest)
+			return
+		} else if err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
 
-		c, err := r.Cookie("Token")
-		isLoggedIn := err == nil
-		var userID int
-		if isLoggedIn {
-			userID, _ = GetUserNameFromToken(c.Value)
-		}
-
-		Comments, err := GetComment(post_id, userID)
+		var post POST
+		post = Posts[0]
+		Comments, err := GetComment(post_id, user_id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		Data := data{Post: post[0], COMMENT: Comments}
+		Data := data{Post: post, COMMENT: Comments}
 		err = CommentT.Execute(w, Data)
 		if err != nil {
 			http.Error(w, "Could not load template", http.StatusInternalServerError)
-		}
-	case http.MethodPost:
-		c, _ := r.Cookie("Token")
-		user_id, _ := GetUserNameFromToken(c.Value)
-		content := r.FormValue("Content")
-
-		post_id, err := strconv.Atoi(r.FormValue("post_id"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if content == "" {
-			link := "/Commenting?post_id=" + strconv.Itoa(post_id)
-			http.Redirect(w, r, link, http.StatusSeeOther)
+	case http.MethodPost:
+		c, err := r.Cookie("Token")
+		if err != nil {
+			w.WriteHeader(403)
+			return
+		}
+		user_id, err := GetUserNameFromToken(c.Value)
+		if err != nil {
+			w.WriteHeader(403)
+			return
+		}
+
+		post_id, _ := strconv.Atoi(r.FormValue("post_id"))
+		content := r.FormValue("Content")
+		if content == "" || post_id == 0 {
+			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
 
@@ -93,12 +98,12 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 			Id      int    `json:"id"`
 		}
 
-		var res comment
-		db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&res.Uname)
-		res.Content = content
-		res.Id = comment_id
+		var Comment comment
+		db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&Comment.Uname)
+		Comment.Content = content
+		Comment.Id = comment_id
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(res)
+		json.NewEncoder(w).Encode(Comment)
 	default:
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 	}

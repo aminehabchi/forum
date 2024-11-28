@@ -32,7 +32,7 @@ func main() {
 	http.HandleFunc("/Posting", forum.Auth(forum.Posting))
 	http.HandleFunc("/load-more-posts", forum.LoadMorePosts)
 
-	http.HandleFunc("/Commenting", forum.Auth(forum.Commenting))
+	http.HandleFunc("/Commenting", forum.Commenting)
 
 	http.HandleFunc("/like-dislike", forum.Auth(forum.HandleLikeDislike))
 	http.HandleFunc("/filter", forum.FilterHandler)

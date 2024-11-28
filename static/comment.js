@@ -11,8 +11,10 @@ commentForm.addEventListener('submit', function (e) {
             const commentElement = createCommentElement(comment);
             commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
             document.querySelector('.myform').reset();
+            
+            
         }).catch(error => {
-            console.error(error);
+            console.error("eroor",error);
         });
 })
 

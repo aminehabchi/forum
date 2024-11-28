@@ -42,7 +42,9 @@ func Get_Posts(userID int, Query string) ([]POST, error) {
 		p.Likes = getPostLikeDisLike(p.ID, 1)
 		p.Dislikes = getPostLikeDisLike(p.ID, -1)
 		p.CreatedAt = timeCreated.Format("Jan 2, 2006 at 3:04")
-		db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", userID, p.ID).Scan(&p.UserInteraction)
+		if userID!=0{
+			db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", userID, p.ID).Scan(&p.UserInteraction)
+		}
 
 		rowsCategory, _ := db.Query("SELECT category FROM post_categories WHERE post_categories.post_id=?", p.ID)
 		for rowsCategory.Next() {
