@@ -57,11 +57,20 @@ body {
   color: white;
 }
 
+.scrollmenu {
+  overflow-x: auto;
+}
+
+.filter span:hover {
+  background-color: white;
+  color: black;
+}
+
 .filter {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px;
+  min-width: max-content;
 }
 
 .filter input {
@@ -73,14 +82,7 @@ body {
   padding: 7px;
   cursor: pointer;
   font-size: 15px;
-}
-
-.filter select {
-  padding: 6px;
-  font-size: 15px;
-  background-color: #2f2f2f;
-  color: white;
-  border: none;
+  display: inline-block;
 }
 
 .filter input:checked + span {

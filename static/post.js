@@ -81,11 +81,27 @@ observer.observe(loadingContainer)
 
 filterContainer.addEventListener("click", (e) => {
     const action = e.target.closest(".filteraction")
-    if (action) {
-        filterCategory(action.name);
+    if (!action) return
+
+    if (action.getAttribute('data-checked') === 'true') {
+        action.checked = false;
+        action.setAttribute('data-checked', 'false');
+        filterCategory('');
+    } else {
+        document.querySelectorAll('.filteraction').forEach(r => {
+            r.checked = false;
+            r.setAttribute('data-checked', 'false');
+        });
+
+        action.checked = true;
+        action.setAttribute('data-checked', 'true');
+        
+        filterCategory(action.value);
     }
 })
 
-function filterCategory(action) {
-    fetch(`/filter?type=${action}`)
+function filterCategory(type) {
+    fetch(`/filter?type=${type}`)
+        .then(resp => resp.json())
+        .catch(error => console.error('Error:', error));
 }

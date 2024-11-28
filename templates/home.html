@@ -49,15 +49,25 @@
     </header>
 
     <div class="container">
-      <div id="filterContainer">
+      <div class="scrollmenu" id="filterContainer">
         <div class="filter">
           {{if .IsLoggedIn}}
           <label>
-            <input type="checkbox" class="filteraction" name="created" />
+            <input
+              type="radio"
+              class="filteraction"
+              name="filter"
+              value="created"
+            />
             <span>My Posts</span>
           </label>
           <label>
-            <input type="checkbox" class="filteraction" name="liked" />
+            <input
+              type="radio"
+              class="filteraction"
+              name="filter"
+              value="liked"
+            />
             <span>Liked Posts</span>
           </label>
           {{end}}
