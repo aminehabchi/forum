@@ -38,7 +38,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		post, err := Get_Posts(user_id, `
 		SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
 		JOIN users ON posts.user_id = users.id
-		WHERE posts.user_id=`+strconv.Itoa(user_id))
+		WHERE posts.user_id=`+strconv.Itoa(user_id)+` and posts.id=`+r.FormValue("post_id"))
 
 		if err != nil && err != sql.ErrNoRows {
 			fmt.Println(post_id)
