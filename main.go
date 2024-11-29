@@ -13,7 +13,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	err = forum.Createbase()
+	err = forum.CreateDB()
 	if err != nil {
 		fmt.Println(err)
 		return

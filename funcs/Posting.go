@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-var allCategories map[string]bool
-
 func Posting(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
