@@ -3,15 +3,16 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func FilterHandler(w http.ResponseWriter, r *http.Request) {
-	filter := r.FormValue("type")
-	fmt.Println(filter)
-	if !allCategories[filter] {
+	filter := strings.ToLower(r.URL.Query().Get("type"))
+
+	if filter != "" && !allCategories[strings.ToLower(filter)] &&
+		filter != "created" && filter != "liked" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -19,6 +20,11 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	userID := 0
 	if cookie, err := r.Cookie("Token"); err == nil {
 		userID, _ = GetUserIDFromToken(cookie.Value)
+	}
+
+	if (filter == "created" || filter == "liked") && userID == 0 {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
 	opts := QueryOptions{

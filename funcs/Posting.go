@@ -3,30 +3,43 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
+
+type PostingData struct {
+	Categories []string
+	Error      string
+}
+
+var defaultCategories = []string{"General", "News", "Entertainment", "Hobbies", "Lifestyle", "Technology"}
 
 func Posting(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		err := PostingT.Execute(w, nil)
+		err := PostingT.Execute(w, PostingData{Categories: defaultCategories})
 		if err != nil {
 			http.Error(w, "Could not load template", http.StatusInternalServerError)
 		}
 	case http.MethodPost:
 		var err error
 		c, _ := r.Cookie("Token")
-
 		id, _ := GetUserIDFromToken(c.Value)
-		title := r.FormValue("title")
-		content := r.FormValue("content")
+
+		title := strings.TrimSpace(r.FormValue("title"))
+		content := strings.TrimSpace(r.FormValue("content"))
 		category := r.Form["categories"]
 
 		if title == "" || content == "" || len(category) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
-			err = PostingT.Execute(w, "All fields are required, Please fill them")
+			data := PostingData{
+				Categories: defaultCategories,
+				Error:      "All fields are required, Please fill them",
+			}
+			err = PostingT.Execute(w, data)
 			if err != nil {
 				http.Error(w, "Could not load template", http.StatusInternalServerError)
 			}
@@ -35,7 +48,11 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 
 		if !CategoryFilter(category) {
 			w.WriteHeader(http.StatusBadRequest)
-			err = PostingT.Execute(w, "Invalid categorie, Please write valid catgerie")
+			data := PostingData{
+				Categories: defaultCategories,
+				Error:      "Invalid categorie, Please write valid catgerie",
+			}
+			err = PostingT.Execute(w, data)
 			if err != nil {
 				http.Error(w, "Could not load template", http.StatusInternalServerError)
 			}
@@ -48,7 +65,7 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 	}
@@ -63,15 +80,17 @@ func insertPost(id int, title, content string, categories []string) error {
 	idPost, _ := a.LastInsertId()
 
 	for _, category := range categories {
+
+		formattedCategory := strings.ToUpper(string(category[0])) + strings.ToLower(string(category[1:]))
 		selector = `INSERT INTO post_categories(post_id,category) VALUES (?,?)`
-		_, _ = db.Exec(selector, idPost, category)
+		_, _ = db.Exec(selector, idPost, formattedCategory)
 	}
 	return nil
 }
 
 func CategoryFilter(categories []string) bool {
 	for _, v := range categories {
-		if !allCategories[v] {
+		if !allCategories[strings.ToLower(v)] {
 			return false
 		}
 	}
@@ -85,6 +104,10 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	offsetValue := r.FormValue("offset")
+	filterType := r.FormValue("type")
+
+	fmt.Println("filter ->", filterType)
+
 	offset, err := strconv.Atoi(offsetValue)
 	if err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
@@ -102,6 +125,7 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 		UserID: user_id,
 		Limit:  3,
 		Offset: offset,
+		Filter: filterType,
 	}
 
 	query, args := BuildPostQuery(opts)

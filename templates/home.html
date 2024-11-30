@@ -22,8 +22,6 @@
               <i class="fa-regular fa-pen-to-square"></i>
               <input
                 type="submit"
-                name="pst"
-                value=""
                 class="postbtn"
                 formaction="/Posting"
                 formmethod="get"
@@ -33,7 +31,6 @@
               <i class="fa-solid fa-power-off"></i>
               <input
                 type="submit"
-                name="logout"
                 value=""
                 class="postbtn"
                 formaction="/logout"
@@ -97,7 +94,7 @@
             </div>
             <h4>{{.Title}}</h4>
             {{range .Category}}
-            <a class="category" href="/filter?category={{.}}"
+            <a class="category" href="/filter?type={{.}}"
               ><i class="fas fa-tag"></i> {{.}}</a
             >
             {{end}}

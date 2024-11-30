@@ -10,13 +10,12 @@ import (
 var (
 	db            *sql.DB
 	allCategories = map[string]bool{
-		"Created":       true,
-		"Liked":         true,
-		"General":       true,
-		"News":          true,
-		"Entertainment": true,
-		"Hobbies":       true,
-		"Lifestyle":     true,
+		"general":       true,
+		"news":          true,
+		"entertainment": true,
+		"hobbies":       true,
+		"lifestyle":     true,
+		"technology":    true,
 	}
 )
 

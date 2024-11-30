@@ -19,7 +19,9 @@
     <div class="form-container">
       <form class="myform" action="/Posting" method="post">
         <h1>Create a New Post</h1>
-        <span class="error">{{.}}</span>
+        {{if .Error}}
+        <span class="error">{{.Error}}</span>
+        {{end}}
         <input
           class="input"
           type="text"
@@ -27,34 +29,16 @@
           placeholder="Title"
           required
         />
-
         <div
           class="categorie"
           style="display: flex; gap: 8px; margin-bottom: 8px"
         >
+          {{range .Categories}}
           <label>
-            <input type="checkbox" name="categories" value="General" />
-            General
+            <input type="checkbox" name="categories" value="{{.}}" />
+            {{.}}
           </label>
-          <label>
-            <input type="checkbox" name="categories" value="News" /> News
-          </label>
-          <label>
-            <input type="checkbox" name="categories" value="Entertainment" />
-            Entertainment
-          </label>
-          <label>
-            <input type="checkbox" name="categories" value="Hobbies" />
-            Hobbies
-          </label>
-          <label>
-            <input type="checkbox" name="categories" value="Lifestyle" />
-            Lifestyle
-          </label>
-          <label>
-            <input type="checkbox" name="categories" value="Technology" />
-            Technology
-          </label>
+          {{end}}
         </div>
 
         <textarea

@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"strings"
 	"time"
 )
 
@@ -80,20 +81,21 @@ func BuildPostQuery(opts QueryOptions) (string, []interface{}) {
 			args = append(args, opts.PostID)
 		}
 
-	case "Created":
+	case "created":
 		baseQuery += " WHERE posts.user_id = ?"
 		args = append(args, opts.UserID)
 
-	case "Liked":
+	case "liked":
 		baseQuery += `
             JOIN post_interactions ON post_interactions.post_id = posts.id
             WHERE post_interactions.user_id = ? AND post_interactions.interaction = 1`
 		args = append(args, opts.UserID)
 	default:
+		formattedCategory := strings.ToUpper(string(opts.Filter[0])) + strings.ToLower(opts.Filter[1:])
 		baseQuery += `
             JOIN post_categories ON post_categories.post_id = posts.id
             WHERE post_categories.category = ?`
-		args = append(args, opts.Filter)
+		args = append(args, formattedCategory)
 	}
 
 	baseQuery += " ORDER BY posts.id DESC"

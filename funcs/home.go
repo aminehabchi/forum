@@ -43,7 +43,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	}{
 		Posts:      posts,
 		IsLoggedIn: userID > 0,
-		Categories: []string{"General", "Technology", "News", "Entertainment", "Hobbies", "Lifestyle"},
+		Categories: defaultCategories,
 	}
 
 	if err = HomeT.Execute(w, data); err != nil {
