@@ -42,4 +42,10 @@ baseQuery := `
 -> to be reviewed that it doesn't miss anything.
 ```
 
-- Loading...
+-  the cookie configuration ?? 
+```
+-> to be reviewed 
+-> Secure:true ...
+```
+
+

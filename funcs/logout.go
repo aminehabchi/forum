@@ -9,10 +9,9 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
 		return
 	}
-	cookie := http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:   "Token",
 		MaxAge: -1,
-	}
-	http.SetCookie(w, &cookie)
+	})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

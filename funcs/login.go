@@ -1,12 +1,18 @@
 package forum
 
 import (
-	"errors"
+	"database/sql"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+type User struct {
+	ID       int
+	Password string
+}
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -16,20 +22,33 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Could not load template", http.StatusInternalServerError)
 		}
 	case http.MethodPost:
-		email := r.FormValue("email")
+		identifier := strings.TrimSpace(r.FormValue("email"))
 		password := r.FormValue("password")
 
-		_, id, correctPassword, err := GetUserInfoByLoginInfo(email)
-		if err != nil {
-			err = LoginT.Execute(w, "email not found")
+		if identifier == "" || password == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			err := LoginT.Execute(w, "Please fill in all fields")
 			if err != nil {
-				http.Error(w, "Could not load template", http.StatusInternalServerError)
+				http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 			}
 			return
 		}
 
-		if err := bcrypt.CompareHashAndPassword([]byte(correctPassword), []byte(password)); err != nil {
-			err = LoginT.Execute(w, "password incorrect")
+		user, err := GetUserInfoByLoginInfo(identifier)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				err := LoginT.Execute(w, "Invalid credentials")
+				if err != nil {
+					http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+				}
+				return
+			}
+			http.Error(w, "Could not load template", http.StatusInternalServerError)
+			return
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+			err = LoginT.Execute(w, "Invalid credentials")
 			if err != nil {
 				http.Error(w, "Could not load template", http.StatusInternalServerError)
 			}
@@ -40,7 +59,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "err in token", http.StatusInternalServerError)
 			return
 		}
-		err = setLoginTime(uuidStr, id)
+		err = setToken(uuidStr, user.ID)
 		if err != nil {
 			http.Error(w, "error in token", http.StatusInternalServerError)
 			return
@@ -61,20 +80,21 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetUserInfoByLoginInfo(email_users string) (string, int, string, error) {
-	query := `SELECT id, password FROM users WHERE email = ?`
-	var password string
-	var id int
-	err := db.QueryRow(query, email_users).Scan(&id, &password)
-	if err == nil {
-		return email_users, id, password, nil
+func GetUserInfoByLoginInfo(identifier string) (*User, error) {
+	query := `SELECT id, password FROM users WHERE email = ? OR uname = ?`
+	user := &User{}
+	err := db.QueryRow(query, identifier, identifier).Scan(&user.ID, &user.Password)
+	if err != nil {
+		return nil, err
 	}
-	return "", -1, "", errors.New("not exists")
+	return user, nil
 }
 
-func setLoginTime(token string, id int) error {
+func setToken(token string, id int) error {
 	query := "UPDATE users SET token=? WHERE id=?"
 	_, err := db.Exec(query, token, id)
-
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
