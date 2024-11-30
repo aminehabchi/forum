@@ -1,10 +1,11 @@
 package forum
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"strconv"
 )
 
 func FilterHandler(w http.ResponseWriter, r *http.Request) {
@@ -14,52 +15,25 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	Cookie, _ := r.Cookie("Token")
-	user_id, _ := GetUserNameFromToken(Cookie.Value)
 
-	var posts []POST
-	var query string
-	var err error
-	switch filter {
-	case "":
-		query = `
-		SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
-		JOIN users ON posts.user_id = users.id 
-		ORDER BY posts.id DESC 
-		`
-		posts, err = Get_Posts(user_id, query)
-	case "Created":
-		query = `
-			SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
-			JOIN users ON posts.user_id = users.id
-			WHERE  posts.user_id=` + strconv.Itoa(user_id) + `
-			ORDER BY posts.id DESC 
-			`
-		posts, err = Get_Posts(user_id, query)
-	case "Liked":
-		query = `
-			SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
-			JOIN users ON posts.user_id = users.id
-			JOIN post_interactions ON post_interactions.post_id = posts.id
-			WHERE  users.id=` + strconv.Itoa(user_id) + ` AND post_interactions.interaction=1
-			ORDER BY posts.id DESC;
-			`
-		posts, err = Get_Posts(user_id, query)
+	userID := 0
+	if cookie, err := r.Cookie("Token"); err == nil {
+		userID, _ = GetUserIDFromToken(cookie.Value)
+	}
 
-	default:
-		query = `
-		SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
-		JOIN users ON posts.user_id = users.id
-		JOIN post_categories ON post_categories.post_id = posts.id
-		WHERE  post_categories.category='` + filter + `'
-		ORDER BY posts.id DESC 
-		`
-		posts, err = Get_Posts(user_id, query)
+	opts := QueryOptions{
+		UserID: userID,
+		Filter: filter,
 	}
-	fmt.Println(err)
-	for _, v := range posts {
-		fmt.Println(v)
+
+	query, args := BuildPostQuery(opts)
+	posts, err := GetPosts(userID, query, args...)
+	if err != nil && err != sql.ErrNoRows {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Println("Error getting posts:", err)
+		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }

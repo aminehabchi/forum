@@ -8,7 +8,7 @@ func Auth(funcNext http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("Token")
 		if err == nil {
-			_, ok := GetUserNameFromToken(c.Value)
+			_, ok := GetUserIDFromToken(c.Value)
 			if ok != nil {
 				cookie := http.Cookie{
 					Name:   "Token",
@@ -29,7 +29,7 @@ func AuthLG(funcNext http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("Token")
 		if err == nil {
-			_, ok := GetUserNameFromToken(c.Value)
+			_, ok := GetUserIDFromToken(c.Value)
 			if ok != nil {
 				cookie := http.Cookie{
 					Name:   "Token",

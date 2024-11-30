@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func Posting(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +19,7 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 		var err error
 		c, _ := r.Cookie("Token")
 
-		id, _ := GetUserNameFromToken(c.Value)
+		id, _ := GetUserIDFromToken(c.Value)
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		category := r.Form["categories"]
@@ -83,18 +84,29 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset := r.FormValue("offset")
+	offsetValue := r.FormValue("offset")
+	offset, err := strconv.Atoi(offsetValue)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
 
 	user, err := r.Cookie("Token")
 
 	var user_id int
 	if err == nil {
-		user_id, _ = GetUserNameFromToken(user.Value)
+		user_id, _ = GetUserIDFromToken(user.Value)
 	}
 
-	quert := "SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content,users.uname FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.id DESC LIMIT 3 OFFSET " + offset
+	opts := QueryOptions{
+		UserID: user_id,
+		Limit:  3,
+		Offset: offset,
+	}
 
-	posts, err := Get_Posts(user_id, quert)
+	query, args := BuildPostQuery(opts)
+
+	posts, err := GetPosts(user_id, query, args...)
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)

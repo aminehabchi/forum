@@ -37,13 +37,17 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		Cookie, err := r.Cookie("Token")
 		isLoggedIn := err == nil
 		if isLoggedIn {
-			user_id, _ = GetUserNameFromToken(Cookie.Value)
+			user_id, _ = GetUserIDFromToken(Cookie.Value)
 		}
 
-		Posts, err := Get_Posts(user_id, `
-		SELECT posts.id, posts.user_id,posts.title,posts.created_at ,posts.content, users.uname FROM posts
-		JOIN users ON posts.user_id = users.id
-		WHERE posts.id=`+r.FormValue("post_id"))
+		opts := QueryOptions{
+			UserID: user_id,
+			PostID: r.FormValue("post_id"),
+		}
+
+		query, args := BuildPostQuery(opts)
+
+		Posts, err := GetPosts(user_id, query, args...)
 		if err == sql.ErrNoRows {
 			http.Error(w, "bad request1", http.StatusBadRequest)
 			return
@@ -72,7 +76,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(403)
 			return
 		}
-		user_id, err := GetUserNameFromToken(c.Value)
+		user_id, err := GetUserIDFromToken(c.Value)
 		if err != nil {
 			w.WriteHeader(403)
 			return
@@ -151,4 +155,13 @@ func GetComment(id, userID int) ([]COMMENT, error) {
 		return []COMMENT{}, err
 	}
 	return comments, nil
+}
+
+func getCommentLikeDisLike(comment_id, inter int) int {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM comment_interactions WHERE comment_id=? AND interaction=?", comment_id, inter).Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
 }
