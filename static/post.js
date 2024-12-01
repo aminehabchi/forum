@@ -124,7 +124,18 @@ function filterCategory(type) {
     currentFilter = type
 
     fetch(`/filter?type=${type}`)
-        .then(resp => resp.json())
+        .then(resp => {
+            if (resp.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!resp.ok) {
+                window.location.replace(`/error?s=${resp.status}&st=${resp.statusText}`)
+                return
+            }
+            return resp.json();
+        })
         .then(posts => {
             postsContainer.innerHTML = '';
             if (posts == null) {

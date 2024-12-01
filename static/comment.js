@@ -25,10 +25,17 @@ commentForm.addEventListener('submit', function (e) {
         .then(comment => {
             if (comment.error) {
                 const errorMsg = document.createElement('div');
+                errorMsg.className = "error-message";
                 errorMsg.style.color = 'red';
                 errorMsg.textContent = comment.error;
 
-                commentForm.before(errorMsg);
+                const existingError = commentForm.querySelector('.error-message');
+                if (existingError) {
+                    console.log(existingError);
+                    existingError.remove();
+                }
+
+                commentForm.insertBefore(errorMsg, commentForm.firstChild);
             }
             const commentElement = createCommentElement(comment);
             commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
