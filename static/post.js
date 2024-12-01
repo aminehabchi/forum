@@ -54,8 +54,9 @@ function createPostElement(post) {
             </div>
         </div>
         <h4>${post.Title}</h4>
-            ${post.Category.map(cat => `<a class="category" href="/filter?type=${cat}"
-              ><i class="fas fa-tag"></i>${cat}</a
+            ${post.Category.map(cat => `<a class="category" href="#"
+                onclick="handleCategoryClick(event, '${cat}')"
+              ><i class="fas fa-tag"></i> ${cat}</a
             >`).join(' ')}
         <p class="content">${post.Content}</p>
         <div style="margin-top: 15px;">
@@ -86,6 +87,15 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 1.0 })
 
 observer.observe(loadingContainer)
+
+// ------ Filter ------- //
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.filteraction').forEach(r => {
+        r.checked = false;
+        r.setAttribute('data-checked', 'false');
+    });
+})
 
 filterContainer.addEventListener("click", (e) => {
     const action = e.target.closest(".filteraction")
@@ -126,4 +136,20 @@ function filterCategory(type) {
             })
         })
         .catch(error => console.error('Error:', error));
+}
+
+function handleCategoryClick(event, category) {
+    event.preventDefault();
+
+    const action = document.querySelector(`.filteraction[value=${category}]`)
+    if (action) {
+        document.querySelectorAll('.filteraction').forEach(r => {
+            r.checked = false;
+            r.setAttribute('data-checked', 'false');
+        });
+
+        action.checked = true;
+        action.setAttribute('data-checked', 'true');
+    }
+    filterCategory(category);
 }

@@ -94,7 +94,10 @@
             </div>
             <h4>{{.Title}}</h4>
             {{range .Category}}
-            <a class="category" href="/filter?type={{.}}"
+            <a
+              class="category"
+              href="#"
+              onclick="handleCategoryClick(event, '{{.}}')"
               ><i class="fas fa-tag"></i> {{.}}</a
             >
             {{end}}

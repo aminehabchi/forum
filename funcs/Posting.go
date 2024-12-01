@@ -3,7 +3,6 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -105,8 +104,6 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 
 	offsetValue := r.FormValue("offset")
 	filterType := r.FormValue("type")
-
-	fmt.Println("filter ->", filterType)
 
 	offset, err := strconv.Atoi(offsetValue)
 	if err != nil {
