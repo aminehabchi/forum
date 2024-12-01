@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type COMMENT struct {
@@ -21,22 +22,19 @@ type COMMENT struct {
 type data struct {
 	Post     POST
 	COMMENT  []COMMENT
-	ErrorMsg string
 }
 
 func Commenting(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		post_id, _ := strconv.Atoi(r.FormValue("post_id"))
-		if post_id == 0 {
-			http.Error(w, "bad request", http.StatusBadRequest)
+		post_id, err := strconv.Atoi(r.FormValue("post_id"))
+		if err != nil || post_id <= 0 {
+			http.Error(w, "Invalid post ID", http.StatusBadRequest)
 			return
 		}
 
-		var user_id int
-		Cookie, err := r.Cookie("Token")
-		isLoggedIn := err == nil
-		if isLoggedIn {
+		user_id := 0
+		if Cookie, err := r.Cookie("Token"); err == nil {
 			user_id, _ = GetUserIDFromToken(Cookie.Value)
 		}
 
@@ -47,52 +45,62 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 
 		query, args := BuildPostQuery(opts)
 
-		Posts, err := GetPosts(user_id, query, args...)
-		if err == sql.ErrNoRows {
-			http.Error(w, "bad request1", http.StatusBadRequest)
+		posts, err := GetPosts(user_id, query, args...)
+		if err == sql.ErrNoRows || len(posts) == 0 {
+			http.Error(w, "Post not found", http.StatusNotFound)
 			return
-		} else if err != nil {
+		}
+		if err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
 
-		var post POST
-		post = Posts[0]
-		Comments, err := GetComment(post_id, user_id)
+		comments, err := GetComment(post_id, user_id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		Data := data{Post: post, COMMENT: Comments}
-		err = CommentT.Execute(w, Data)
-		if err != nil {
+		Data := data{
+			Post:    posts[0],
+			COMMENT: comments,
+		}
+		if err = CommentT.Execute(w, Data); err != nil {
 			http.Error(w, "Could not load template", http.StatusInternalServerError)
 			return
 		}
 	case http.MethodPost:
 		c, err := r.Cookie("Token")
 		if err != nil {
-			w.WriteHeader(403)
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		user_id, err := GetUserIDFromToken(c.Value)
 		if err != nil {
-			w.WriteHeader(403)
+			ClearSession(w)
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		post_id, _ := strconv.Atoi(r.FormValue("post_id"))
-		content := r.FormValue("Content")
-		if content == "" || post_id == 0 {
-			http.Error(w, "bad request", http.StatusBadRequest)
+		content := strings.TrimSpace(r.FormValue("Content"))
+		if content == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Please enter a comment",
+			})
+			return
+		}
+
+		post_id, err := strconv.Atoi(r.FormValue("post_id"))
+		if err != nil || post_id <= 0 {
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 
 		var comment_id int
 		comment_id, err = insertComment(post_id, user_id, content)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -103,7 +111,11 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var Comment comment
-		db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&Comment.Uname)
+		err = db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&Comment.Uname)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		Comment.Content = content
 		Comment.Id = comment_id
 		w.Header().Set("Content-Type", "application/json")
@@ -139,7 +151,6 @@ func GetComment(id, userID int) ([]COMMENT, error) {
 		var comment_id int
 		err := rows.Scan(&comment_id, &uname, &content)
 		if err != nil {
-			log.Fatal(err, "err2")
 			return []COMMENT{}, err
 		}
 		comment := COMMENT{Id: comment_id, Uname: uname, Content: content}

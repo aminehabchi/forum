@@ -10,7 +10,7 @@ func Auth(funcNext http.HandlerFunc) http.HandlerFunc {
 		if err == nil {
 			_, ok := GetUserIDFromToken(c.Value)
 			if ok != nil {
-				clearSession(w)
+				ClearSession(w)
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 			} else {
 				funcNext.ServeHTTP(w, r)
@@ -27,7 +27,7 @@ func AuthLG(funcNext http.HandlerFunc) http.HandlerFunc {
 		if err == nil {
 			_, ok := GetUserIDFromToken(c.Value)
 			if ok != nil {
-				clearSession(w)
+				ClearSession(w)
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 			} else {
 				http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -38,7 +38,7 @@ func AuthLG(funcNext http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func clearSession(w http.ResponseWriter) {
+func ClearSession(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:   "Token",
 		MaxAge: -1,

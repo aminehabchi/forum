@@ -6,15 +6,35 @@ commentForm.addEventListener('submit', function (e) {
     fetch('/Commenting', {
         method: 'POST',
         body: formData
-    }).then(resp => resp.json())
+    }).then(resp => {
+        if (resp.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+
+        if (resp.status === 400) {
+            return resp.json();
+        }
+
+        if (!resp.ok) {
+            window.location.replace(`/error?s=${resp.status}&st=${resp.statusText}`)
+            return
+        }
+        return resp.json();
+    })
         .then(comment => {
+            if (comment.error) {
+                const errorMsg = document.createElement('div');
+                errorMsg.style.color = 'red';
+                errorMsg.textContent = comment.error;
+
+                commentForm.before(errorMsg);
+            }
             const commentElement = createCommentElement(comment);
             commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
             document.querySelector('.myform').reset();
-            
-            
         }).catch(error => {
-            console.error("eroor",error);
+            console.error("error", error);
         });
 })
 

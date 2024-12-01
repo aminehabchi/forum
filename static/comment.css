@@ -1,90 +1,116 @@
 /**********navbar************/
 body {
-    width: 70%;
-    margin: auto;
-    background-color: #212121;
-    color: #ECECEC;
+  width: 70%;
+  margin: auto;
+  background-color: #212121;
+  color: #ececec;
 }
 
 .head {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    align-items: center;
-    border-bottom: 1px solid gray;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  align-items: center;
+  border-bottom: 1px solid gray;
 }
 
 .logo {
-    font-family: "Beau Rivage", serif;
-    font-size: 45px;
-    font-weight: 700;
-    font-style: normal;
-    text-decoration: none;
-    color: #ECECEC;
+  font-family: "Beau Rivage", serif;
+  font-size: 45px;
+  font-weight: 700;
+  font-style: normal;
+  text-decoration: none;
+  color: #ececec;
 }
-
 
 /***************post*********************/
 
 .profilInfo {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .profilInfo span {
-    font-family: "Roboto Slab", serif;
-    font-size: 20px;
+  font-family: "Roboto Slab", serif;
+  font-size: 20px;
 }
 
 .profileImg {
-    height: 40px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 12px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 12px;
 }
 
 p {
-    font-size: 16px;
-    word-wrap: break-word;
+  font-size: 16px;
+  word-wrap: break-word;
 }
 
 /***********form***********/
 
 .myform {
-    border:1px solid #000000 ;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    padding: 5px;
+  border: 1px solid #000000;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 5px;
 }
 
-
 textarea {
-    border: none;
-    outline: none;
-    height: 50px;
-    overflow:hidden;
-    color: white;
-    background-color: #212121;
-    padding: 5px;
+  border: none;
+  outline: none;
+  height: 50px;
+  overflow: hidden;
+  color: white;
+  background-color: #212121;
+  padding: 5px;
 }
 
 .input {
-    align-self: self-end;
-    padding: 7px;
-    border-radius: 13px;
-    border: none;
-    background-color: #000000;
-    color: white;
+  align-self: self-end;
+  padding: 7px;
+  border-radius: 13px;
+  border: none;
+  background-color: #000000;
+  color: white;
+  cursor: pointer;
 }
 
-.action-btn.liked-btn {
-    background-color: #4CAF50; 
-    color: white;
+.action-btn {
+  text-decoration: none;
+  background-color: #0000004d;
+  padding: 10px;
+  border-radius: 30px;
+  color: #ececec;
+  transition: background-color 0.3s ease;
+  margin: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  width: 50px;
+  text-align: center;
+  border: none;
+  gap: 5px;
 }
 
+.action-btn.liked-btn,
 .action-btn.disliked-btn {
-    background-color: #F44336;  
-    color: white;
+  background-color: white;
+  color: black;
+}
+
+/***********comment***********/
+
+.comment {
+  background-color: #2f2f2f;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: auto;
+  margin-bottom: 5px;
+  h3 {
+    margin: 0;
+  }
 }
