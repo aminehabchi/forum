@@ -94,9 +94,3 @@ func addInteractions(user_id int, postID, action, types string) error {
 	}
 	return nil
 }
-
-func LikedDislike(postID string, user_id int) int {
-	var existingInteraction int
-	db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", user_id, postID).Scan(&existingInteraction)
-	return existingInteraction
-}
