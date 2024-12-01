@@ -20,8 +20,8 @@ type COMMENT struct {
 }
 
 type data struct {
-	Post     POST
-	COMMENT  []COMMENT
+	Post    POST
+	COMMENT []COMMENT
 }
 
 func Commenting(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +55,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		comments, err := GetComment(post_id, user_id)
+		comments, err := GetComment(post_id, user_id, 3, 0)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -105,9 +105,9 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		}
 
 		type comment struct {
-			Uname   string `json:"uname"`
-			Content string `json:"content"`
-			Id      int    `json:"id"`
+			Uname   string
+			Content string
+			Id      int
 		}
 
 		var Comment comment
@@ -138,8 +138,8 @@ func insertComment(postid, user_id int, content string) (int, error) {
 	return int(commentID), nil
 }
 
-func GetComment(id, userID int) ([]COMMENT, error) {
-	rows, err := db.Query("SELECT comments.id,users.uname,comments.content FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.id DESC", id)
+func GetComment(id, userID, limit, offset int) ([]COMMENT, error) {
+	rows, err := db.Query("SELECT comments.id,users.uname,comments.content FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.id DESC LIMIT ? OFFSET ?", id, limit, offset)
 	if err != nil {
 		return []COMMENT{}, err
 	}
@@ -175,4 +175,39 @@ func getCommentLikeDisLike(comment_id, inter int) int {
 		return 0
 	}
 	return count
+}
+
+func LoadMoreComments(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	offsetValue := r.FormValue("offset")
+
+	offset, err := strconv.Atoi(offsetValue)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	post_id, err := strconv.Atoi(r.FormValue("post_id"))
+	if err != nil || post_id <= 0 {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	user_id := 0
+	if Cookie, err := r.Cookie("Token"); err == nil {
+		user_id, _ = GetUserIDFromToken(Cookie.Value)
+	}
+
+	comments, err := GetComment(post_id, user_id, 3, offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comments)
 }

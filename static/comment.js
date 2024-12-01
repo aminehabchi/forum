@@ -49,27 +49,82 @@ function createCommentElement(comment) {
     const div = document.createElement('div');
     div.className = "comment"
     div.innerHTML = `
-        <h3>${comment.uname}</h3>
-        <p>${comment.content}</p>
+        <h3>${comment.Uname}</h3>
+        <p>${comment.Content}</p>
 
         <button
         class="action-btn likedislikebtn"
-        data-id="${comment.id}"
+        data-id="${comment.Id}"
         data-action="like"
         data-type="comment"
         >
         <i class="fas fa-thumbs-up"></i>
-        <span id="like_post-${comment.id}">0</span>
+        <span id="like_post-${comment.Id}">0</span>
         </button>
         <button
         class="action-btn likedislikebtn"
-        data-id="${comment.id}"
+        data-id="${comment.Id}"
         data-action="dislike"
         data-type="comment"
         >
         <i class="fas fa-thumbs-down"></i>
-        <span id="dislike_post-${comment.id}">0</span>
+        <span id="dislike_post-${comment.Id}">0</span>
         </button>
     `;
     return div;
 }
+
+
+// load more comments
+
+let offset = 3
+let loading = false
+let noMoreComments = false
+
+function loadMorecomments() {
+    if (loading || noMoreComments) return;
+
+    loading = true;
+    loadingContainer.style.visibility = "visible"
+
+    const post_id = document.querySelector('input[name="post_id"]').value;
+
+    const url = new URL('/load-more-comments', window.location.origin);
+    url.searchParams.set('offset', offset);
+    url.searchParams.set('post_id', post_id); 
+
+    fetch(url)
+        .then(resp => resp.json())
+        .then(comments => {
+            if (comments == null) {
+                noMoreComments = true
+                loadingContainer.textContent = 'No more comments to load';
+                return;
+            }
+            console.log(comments);
+            
+            comments.forEach(post => {
+                const postElement = createCommentElement(post);
+                commentsContainer.appendChild(postElement);
+            })
+
+            offset += comments.length
+            loading = false;
+            loadingContainer.style.visibility = "hidden"
+        })
+        .catch(err => {
+            console.error('Error loading more comments:', err);
+            loading = false;
+            loadingContainer.style.visibility = "hidden"
+        })
+}
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            loadMorecomments()
+        }
+    })
+}, { threshold: 1.0 })
+
+observer.observe(loadingContainer)

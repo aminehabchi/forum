@@ -43,9 +43,3 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }
-
-func IsPostLikedByUser(postID, user_id int) bool {
-	var existingInteraction int
-	db.QueryRow("SELECT interaction FROM post_interactions WHERE user_id = ? AND post_id = ?", user_id, postID).Scan(&existingInteraction)
-	return existingInteraction == 1
-}
