@@ -110,9 +110,6 @@ textarea {
   transition: all 0.3s ease;
   overflow: auto;
   margin-bottom: 5px;
-  h3 {
-    margin: 0;
-  }
 }
 
 
