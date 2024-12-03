@@ -19,7 +19,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		err := LoginT.Execute(w, nil)
 		if err != nil {
-			http.Error(w, "Could not load template", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 		}
 	case http.MethodPost:
 		identifier := strings.TrimSpace(r.FormValue("email"))
@@ -29,7 +29,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			err := LoginT.Execute(w, "Please fill in all fields")
 			if err != nil {
-				http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+				ErrorHandler(w, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -39,29 +39,29 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			if err == sql.ErrNoRows {
 				err := LoginT.Execute(w, "Invalid credentials")
 				if err != nil {
-					http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+					ErrorHandler(w, http.StatusInternalServerError)
 				}
 				return
 			}
-			http.Error(w, "Could not load template", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 
 		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 			err = LoginT.Execute(w, "Invalid credentials")
 			if err != nil {
-				http.Error(w, "Could not load template", http.StatusInternalServerError)
+				ErrorHandler(w, http.StatusInternalServerError)
 			}
 			return
 		}
 		uuidStr, err := GenereteTocken()
 		if err != nil {
-			http.Error(w, "err in token", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 		err = setToken(uuidStr, user.ID)
 		if err != nil {
-			http.Error(w, "error in token", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 		newCookie := http.Cookie{
@@ -76,7 +76,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 	}
 }
 

@@ -14,7 +14,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		err := RegisterT.Execute(w, nil)
 		if err != nil {
-			http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 		}
 	case http.MethodPost:
 		email := strings.TrimSpace(r.FormValue("email"))
@@ -25,14 +25,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			err := RegisterT.Execute(w, err)
 			if err != nil {
-				http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+				ErrorHandler(w, http.StatusInternalServerError)
 			}
 			return
 		}
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			http.Error(w, "Could not hash password", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 
@@ -43,27 +43,27 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			case strings.Contains(errMsg, "UNIQUE constraint failed: users.uname"):
 				if execErr := RegisterT.Execute(w, "This username is already taken. Please choose a different one."); execErr != nil {
 					log.Printf("Template execution error: %v", execErr)
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					ErrorHandler(w, http.StatusInternalServerError)
 				}
 				return
 
 			case strings.Contains(errMsg, "UNIQUE constraint failed: users.email"):
 				if execErr := RegisterT.Execute(w, "This email address is already registered. Please use a different email."); execErr != nil {
 					log.Printf("Template execution error: %v", execErr)
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					ErrorHandler(w, http.StatusInternalServerError)
 				}
 				return
 
 			default:
 				log.Printf("Database error during registration: %v", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				ErrorHandler(w, http.StatusInternalServerError)
 				return
 			}
 		} else {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 		}
 	default:
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 	}
 }
 

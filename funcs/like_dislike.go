@@ -6,13 +6,13 @@ import (
 
 func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
 
 	user_id, ok := CheckIfCookieValid(w, r)
 	if !ok {
-		w.WriteHeader(http.StatusForbidden)
+		ErrorHandler(w, http.StatusForbidden)
 		return
 	}
 	action := r.FormValue("action")
@@ -20,13 +20,13 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 	commentid := r.FormValue("commentid")
 
 	if (types != "post" && types != "comment") || (action != "dislike" && action != "like") {
-		w.WriteHeader(http.StatusBadRequest)
+		ErrorHandler(w, http.StatusBadRequest)
 		return
 	}
 
 	err := addInteractions(user_id, commentid, action, types)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		ErrorHandler(w, http.StatusInternalServerError)
 		return
 	}
 }

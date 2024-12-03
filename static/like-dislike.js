@@ -7,7 +7,7 @@ document.addEventListener("click", (e) => {
 
 const likeDislike = (Id, action, type) => {
   fetch(`/like-dislike?action=${action}&commentid=${Id}&type=${type}`)
-    .then((res) => {
+    .then(async (res) => {
 
       if (res.status == 200) {
         const likespan = document.querySelector(`#like_post-${Id}`);
@@ -47,7 +47,8 @@ const likeDislike = (Id, action, type) => {
       } else if (res.status == 403) {
         window.location.replace("/login");
       } else {
-        window.location.replace(`/error?s=${res.status}&st=${res.statusText}`);
+        const html = await res.text();
+        document.documentElement.innerHTML = html;
       }
     })
     .catch((err) => {

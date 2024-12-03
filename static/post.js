@@ -17,7 +17,15 @@ function loadMorePosts() {
     }
 
     fetch(url)
-        .then(resp => resp.json())
+        .then(async resp => {
+            if (resp.ok) {
+                return resp.json()
+            }else {
+                const html = await resp.text();
+                document.documentElement.innerHTML = html;
+            }
+
+        })
         .then(posts => {
             if (posts == null) {
                 noMorePosts = true

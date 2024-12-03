@@ -3,7 +3,7 @@ package forum
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,7 +21,7 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		err := PostingT.Execute(w, PostingData{Categories: defaultCategories})
 		if err != nil {
-			http.Error(w, "Could not load template", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 		}
 	case http.MethodPost:
 		var err error
@@ -40,7 +40,7 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 			}
 			err = PostingT.Execute(w, data)
 			if err != nil {
-				http.Error(w, "Could not load template", http.StatusInternalServerError)
+				ErrorHandler(w, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -49,24 +49,24 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			data := PostingData{
 				Categories: defaultCategories,
-				Error:      "Invalid categorie, Please write valid catgerie",
+				Error:      "Invalid categorie, Please write valid categorie",
 			}
 			err = PostingT.Execute(w, data)
 			if err != nil {
-				http.Error(w, "Could not load template", http.StatusInternalServerError)
+				ErrorHandler(w, http.StatusInternalServerError)
 			}
 			return
 		}
 
 		err = insertPost(id, title, content, category)
 		if err != nil {
-			http.Error(w, "Failed to create post", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -98,16 +98,16 @@ func CategoryFilter(categories []string) bool {
 
 func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
-
+	fmt.Println(r.URL.Scheme)
 	offsetValue := r.FormValue("offset")
 	filterType := r.FormValue("type")
 
 	offset, err := strconv.Atoi(offsetValue)
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		ErrorHandler(w, http.StatusBadRequest)
 		return
 	}
 
@@ -129,8 +129,7 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := GetPosts(user_id, query, args...)
 	if err != nil && err != sql.ErrNoRows {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Println("Error getting posts:", err)
+		ErrorHandler(w, http.StatusInternalServerError)
 		return
 	}
 

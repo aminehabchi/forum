@@ -1,22 +1,22 @@
-FROM golang:1.22.3-alpine
+FROM golang:1.22.2-alpine AS start
 
-# Set the Working Directory in the Container
 WORKDIR /Forum/
 
-# Install dependencies for go-sqlite3 and Bash
-RUN apk update && \
-    apk add --no-cache bash gcc musl-dev
-
-# Copy go.mod and go.sum files first to leverage Docker cache
-COPY go.mod go.sum ./
-
-# Enable CGO and download dependencies
-ENV CGO_ENABLED=1
-RUN go mod download
+RUN apk add gcc musl-dev
 
 COPY . .
 
 RUN go build -o forum .
+
+FROM alpine
+
+WORKDIR /myProject
+
+COPY --from=start /Forum/forum /myProject/forum
+COPY --from=start /Forum/static /myProject/static
+COPY --from=start /Forum/templates /myProject/templates
+COPY --from=start /Forum/database.db /myProject/database.db
+
 
 LABEL version="0.0.1"
 LABEL projectname="FORUM"

@@ -1,0 +1,44 @@
+body {
+    background-color: gray;
+}
+
+errContainer {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.err {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#errstatus {
+    font-size: 80px;
+    font-weight: 700;
+    margin: 25px 0;
+}
+
+#errtitle {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+#errmessage {
+    margin: 30px;
+    font-size: 10px;
+    text-align: center;
+}
+
+a {
+    padding-top: 6px;
+    text-decoration: none;
+    box-shadow: 0 0 5px rgba(29, 29, 29, 0.5);
+    width: 120px;
+    border-radius: 10px;
+    color: #000000;
+    height: 30px;
+    text-align: center;
+}

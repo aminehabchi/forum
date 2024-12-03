@@ -67,7 +67,8 @@
             />
             <span>Liked</span>
           </label>
-          {{end}} {{range .Categories}}
+          {{end}}
+          {{range .Categories}}
           <label>
             <input
               type="radio"
@@ -138,6 +139,7 @@
       </main>
     </div>
   </body>
-  <script src="/static/like-dislike.js"></script>
+  <script type="module" src="/static/errorhtml.js"></script>
+  <script type="module" src="/static/like-dislike.js"></script>
   <script src="/static/post.js"></script>
 </html>

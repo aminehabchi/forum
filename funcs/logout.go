@@ -6,7 +6,7 @@ import (
 
 func Logout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
