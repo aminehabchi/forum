@@ -7,11 +7,11 @@ import (
 
 func Home(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		ErrorHandler(w, 500)
+		ErrorHandler(w, http.StatusInternalServerError)
 		return
 	}
 	if r.URL.Path != "/" {
-		ErrorHandler(w, 400)
+		ErrorHandler(w, http.StatusNotFound)
 		return
 	}
 
@@ -30,7 +30,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := GetPosts(userID, query, args...)
 	if err != nil && err != sql.ErrNoRows {
-		ErrorHandler(w, 500)
+		ErrorHandler(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -45,6 +45,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = HomeT.Execute(w, data); err != nil {
-		ErrorHandler(w, 500)
+		ErrorHandler(w, http.StatusInternalServerError)
 	}
 }

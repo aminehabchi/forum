@@ -12,7 +12,7 @@ func HandleLikeDislike(w http.ResponseWriter, r *http.Request) {
 
 	user_id, ok := CheckIfCookieValid(w, r)
 	if !ok {
-		ErrorHandler(w, http.StatusForbidden)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	action := r.FormValue("action")
@@ -58,7 +58,7 @@ func addInteractions(user_id int, postID, action, types string) error {
 		if err != nil {
 			return err
 		}
-	} else { // check error no row and add internal server error
+	} else {
 		var selector string
 		if types == "post" {
 			selector = `INSERT INTO post_interactions(user_id,post_id,interaction) VALUES (?,?,?)`

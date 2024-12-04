@@ -69,7 +69,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Value:    uuidStr,
 			Expires:  time.Now().Add(1 * time.Hour),
 			HttpOnly: true,
-			Secure:   true,
 		}
 
 		http.SetCookie(w, &newCookie)

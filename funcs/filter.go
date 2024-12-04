@@ -13,9 +13,9 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if filter != "" && !allCategories[strings.ToLower(filter)] &&
 		filter != "created" && filter != "liked" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+			ErrorHandler(w,http.StatusBadRequest)
+			return
+		}
 
 	userID := 0
 	if cookie, err := r.Cookie("Token"); err == nil {
@@ -35,11 +35,14 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	query, args := BuildPostQuery(opts)
 	posts, err := GetPosts(userID, query, args...)
 	if err != nil && err != sql.ErrNoRows {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, http.StatusInternalServerError)
 		log.Println("Error getting posts:", err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	err = json.NewEncoder(w).Encode(posts)
+	if err != nil {
+		ErrorHandler(w, http.StatusInternalServerError)
+	}
 }

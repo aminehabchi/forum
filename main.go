@@ -30,11 +30,11 @@ func main() {
 	http.HandleFunc("/Posting", forum.Auth(forum.Posting))
 	http.HandleFunc("/load-more-posts", forum.LoadMorePosts)
 
-	http.HandleFunc("/Commenting", forum.Commenting)// still need to handel err
-	http.HandleFunc("/load-more-comments", forum.LoadMoreComments)// still need to handel err
+	http.HandleFunc("/Commenting", forum.Commenting)
+	http.HandleFunc("/load-more-comments", forum.LoadMoreComments)
 
 	http.HandleFunc("/like-dislike", forum.HandleLikeDislike)
-	http.HandleFunc("/filter", forum.FilterHandler)// still need to handel err
+	http.HandleFunc("/filter", forum.FilterHandler)
 
 	fmt.Println("http://localhost:8080/")
 	http.ListenAndServe(":8080", nil)

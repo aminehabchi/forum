@@ -6,7 +6,7 @@ func StaticFileHandler(w http.ResponseWriter, r *http.Request) {
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
 
 	if r.URL.Path == "/static/" {
-		ErrorHandler(w, 403)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

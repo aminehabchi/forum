@@ -94,8 +94,7 @@ textarea {
   gap: 5px;
 }
 
-.action-btn.liked-btn,
-.action-btn.disliked-btn {
+.action-btn.liked-btn{
   background-color: white;
   color: black;
 }

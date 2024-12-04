@@ -44,7 +44,7 @@ const likeDislike = (Id, action, type) => {
             dislikebtn.classList.remove("liked-btn");
           }
         }
-      } else if (res.status == 403) {
+      } else if (res.status == 401) {
         window.location.replace("/login");
       } else {
         const html = await res.text();

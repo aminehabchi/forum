@@ -68,7 +68,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterValidation(email, uname, password string) string {
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9.]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	if email == "" || !emailRegex.MatchString(email) {
 		return "Please enter a valid email address"
 

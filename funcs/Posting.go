@@ -134,5 +134,8 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	err = json.NewEncoder(w).Encode(posts)
+	if err != nil {
+		ErrorHandler(w, http.StatusInternalServerError)
+	}
 }

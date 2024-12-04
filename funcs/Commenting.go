@@ -29,7 +29,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		post_id, err := strconv.Atoi(r.FormValue("post_id"))
 		if err != nil || post_id <= 0 {
-			http.Error(w, "Invalid post ID", http.StatusBadRequest)
+			ErrorHandler(w, http.StatusBadRequest)
 			return
 		}
 
@@ -47,17 +47,17 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 
 		posts, err := GetPosts(user_id, query, args...)
 		if err == sql.ErrNoRows || len(posts) == 0 {
-			http.Error(w, "Post not found", http.StatusNotFound)
+			ErrorHandler(w, http.StatusNotFound)
 			return
 		}
 		if err != nil {
-			http.Error(w, "server error", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 
 		comments, err := GetComment(post_id, user_id, 3, 0)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 
@@ -66,7 +66,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 			COMMENT: comments,
 		}
 		if err = CommentT.Execute(w, Data); err != nil {
-			http.Error(w, "Could not load template", http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 	case http.MethodPost:
@@ -85,15 +85,19 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		content := strings.TrimSpace(r.FormValue("Content"))
 		if content == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{
+			err = json.NewEncoder(w).Encode(map[string]string{
 				"error": "Please enter a comment",
 			})
+
+			if err != nil  {
+				ErrorHandler(w, http.StatusInternalServerError)
+			}
 			return
 		}
 
 		post_id, err := strconv.Atoi(r.FormValue("post_id"))
 		if err != nil || post_id <= 0 {
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+			ErrorHandler(w, http.StatusBadRequest)
 			return
 		}
 
@@ -113,15 +117,18 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		var Comment comment
 		err = db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&Comment.Uname)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			ErrorHandler(w,http.StatusInternalServerError)
 			return
 		}
 		Comment.Content = content
 		Comment.Id = comment_id
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(Comment)
+		err = json.NewEncoder(w).Encode(Comment)
+		if err != nil  {
+			ErrorHandler(w, http.StatusInternalServerError)
+		}
 	default:
-		http.Error(w, "method not alowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -179,7 +186,7 @@ func getCommentLikeDisLike(comment_id, inter int) int {
 
 func LoadMoreComments(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -187,13 +194,13 @@ func LoadMoreComments(w http.ResponseWriter, r *http.Request) {
 
 	offset, err := strconv.Atoi(offsetValue)
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		ErrorHandler(w, http.StatusBadRequest)
 		return
 	}
 
 	post_id, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil || post_id <= 0 {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		ErrorHandler(w, http.StatusBadRequest)
 		return
 	}
 
@@ -204,10 +211,13 @@ func LoadMoreComments(w http.ResponseWriter, r *http.Request) {
 
 	comments, err := GetComment(post_id, user_id, 3, offset)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ErrorHandler(w, http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comments)
+	err = json.NewEncoder(w).Encode(comments)
+	if err != nil {
+		ErrorHandler(w, http.StatusInternalServerError)
+	}
 }

@@ -27,9 +27,6 @@ func ErrorHandler(w http.ResponseWriter, status int) {
 	case http.StatusBadRequest:
 		title = "Bad Request"
 		message = "somthing wrong from your part"
-	case http.StatusForbidden:
-		title = "Forbidden Access"
-		message = "You do not have the rights to access this resource!"
 	default:
 		title = "Error"
 		message = "An unexpected error occurred."
