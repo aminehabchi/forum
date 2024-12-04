@@ -38,6 +38,7 @@ commentForm.addEventListener('submit', function (e) {
                 }
 
                 commentForm.insertBefore(errorMsg, commentForm.firstChild);
+                return
             }
             const commentElement = createCommentElement(comment);
             commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
