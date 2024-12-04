@@ -22,7 +22,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 	opts := QueryOptions{
 		UserID: userID,
-		Limit:  3,
+		Limit:  4,
 		Offset: 0,
 	}
 

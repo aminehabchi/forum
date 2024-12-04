@@ -1,4 +1,4 @@
-let offset = 3
+let offset = 4
 let loading = false
 let noMorePosts = false
 let currentFilter = '';
@@ -92,7 +92,7 @@ const observer = new IntersectionObserver((entries) => {
             loadMorePosts()
         }
     })
-}, { threshold: 1.0 })
+})
 
 observer.observe(loadingContainer)
 
@@ -127,7 +127,7 @@ filterContainer.addEventListener("click", (e) => {
 })
 
 function filterCategory(type) {
-    offset = 3;
+    offset = 4;
     noMorePosts = false;
     currentFilter = type
 

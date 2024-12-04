@@ -1,3 +1,5 @@
+let offset = 3
+
 commentForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -39,6 +41,7 @@ commentForm.addEventListener('submit', function (e) {
             }
             const commentElement = createCommentElement(comment);
             commentsContainer.insertBefore(commentElement, commentsContainer.firstChild);
+            offset += 1
             document.querySelector('.myform').reset();
         }).catch(error => {
             console.error("error", error);
@@ -77,7 +80,6 @@ function createCommentElement(comment) {
 
 // load more comments
 
-let offset = 3
 let loading = false
 let noMoreComments = false
 
@@ -125,6 +127,6 @@ const observer = new IntersectionObserver((entries) => {
             loadMorecomments()
         }
     })
-}, { threshold: 1.0 })
+})
 
 observer.observe(loadingContainer)

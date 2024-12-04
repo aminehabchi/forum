@@ -120,7 +120,7 @@ func LoadMorePosts(w http.ResponseWriter, r *http.Request) {
 
 	opts := QueryOptions{
 		UserID: user_id,
-		Limit:  3,
+		Limit:  4,
 		Offset: offset,
 		Filter: filterType,
 	}
