@@ -26,7 +26,15 @@ const (
         email TEXT NOT NULL UNIQUE,
         uname TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        token TEXT UNIQUE
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    `
+	tokensTables = `
+    CREATE TABLE IF NOT EXISTS tokens (
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        token TEXT UNIQUE,
+        created_at DATETIME,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
     `
 	postsTable = `
@@ -96,6 +104,7 @@ func CreateDB() error {
 		schema string
 	}{
 		{"users", usersTables},
+		{"tokens", tokensTables},
 		{"posts", postsTable},
 		{"post_categories", categoriesTable},
 		{"comments", commentsTable},

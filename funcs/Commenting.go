@@ -89,7 +89,7 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 				"error": "Please enter a comment",
 			})
 
-			if err != nil  {
+			if err != nil {
 				ErrorHandler(w, http.StatusInternalServerError)
 			}
 			return
@@ -117,14 +117,14 @@ func Commenting(w http.ResponseWriter, r *http.Request) {
 		var Comment comment
 		err = db.QueryRow(`SELECT uname FROM users WHERE id = ?`, user_id).Scan(&Comment.Uname)
 		if err != nil {
-			ErrorHandler(w,http.StatusInternalServerError)
+			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
 		Comment.Content = content
 		Comment.Id = comment_id
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(Comment)
-		if err != nil  {
+		if err != nil {
 			ErrorHandler(w, http.StatusInternalServerError)
 		}
 	default:

@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -22,7 +23,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			ErrorHandler(w, http.StatusInternalServerError)
 		}
 	case http.MethodPost:
-		identifier := strings.TrimSpace(r.FormValue("email"))
+		identifier := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 		password := r.FormValue("password")
 
 		if identifier == "" || password == "" {
@@ -61,6 +62,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		err = setToken(uuidStr, user.ID)
 		if err != nil {
+			fmt.Println(err)
 			ErrorHandler(w, http.StatusInternalServerError)
 			return
 		}
@@ -90,7 +92,7 @@ func GetUserInfoByLoginInfo(identifier string) (*User, error) {
 }
 
 func setToken(token string, id int) error {
-	query := "UPDATE users SET token=? WHERE id=?"
+	query := "UPDATE tokens SET token=?,created_at=CURRENT_TIMESTAMP WHERE user_id=?"
 	_, err := db.Exec(query, token, id)
 	if err != nil {
 		return err

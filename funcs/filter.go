@@ -19,7 +19,7 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID := 0
 	if cookie, err := r.Cookie("Token"); err == nil {
-		userID, _ = GetUserIDFromToken(cookie.Value)
+		userID,_ = GetUserIDFromToken(cookie.Value)
 	}
 
 	if (filter == "created" || filter == "liked") && userID == 0 {

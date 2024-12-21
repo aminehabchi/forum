@@ -26,7 +26,7 @@ func Posting(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		var err error
 		c, _ := r.Cookie("Token")
-		id, _ := GetUserIDFromToken(c.Value)
+		id,_ := GetUserIDFromToken(c.Value)
 
 		title := strings.TrimSpace(r.FormValue("title"))
 		content := strings.TrimSpace(r.FormValue("content"))
