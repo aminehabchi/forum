@@ -31,8 +31,8 @@ func ErrorHandler(w http.ResponseWriter, status int) {
 		title = "Error"
 		message = "An unexpected error occurred."
 	}
-	data := struct{
-		Status int
+	data := struct {
+		Status         int
 		Title, Message string
 	}{
 		status, title, message,

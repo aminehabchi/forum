@@ -1,12 +1,13 @@
 package forum
 
 import (
+	Error "forum/funcs/error"
 	"net/http"
 )
 
 func Logout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		ErrorHandler(w, http.StatusMethodNotAllowed)
+		Error.ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{

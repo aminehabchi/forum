@@ -84,53 +84,6 @@
       <!-- Main content -->
       <main class="main-content">
         <div class="Posts" id="postsContainer">
-          {{range .Posts}}
-          <div class="post">
-            <div class="profilInfo">
-              <img class="profileImg" src="static/profil.png" />
-              <div class="profile-details">
-                <span>{{.Name}}</span>
-                <span class="time">{{.CreatedAt}}</span>
-              </div>
-            </div>
-            <h4>{{.Title}}</h4>
-            {{range .Category}}
-            <a
-              class="category"
-              href="#"
-              onclick="handleCategoryClick(event, '{{.}}')"
-              ><i class="fas fa-tag"></i> {{.}}</a
-            >
-            {{end}}
-            <p class="content">{{.Content}}</p>
-            <div style="margin-top: 15px">
-              <button
-                class="action-btn likedislikebtn 
-                {{if eq .UserInteraction 1}}liked-btn{{end}}"
-                data-id="{{.ID}}"
-                data-action="like"
-                data-type="post"
-              >
-                <i class="fas fa-thumbs-up"></i>
-                <span id="like_post-{{.ID}}">{{.Likes}}</span>
-              </button>
-              <button
-                class="action-btn likedislikebtn 
-                {{if eq .UserInteraction -1}}liked-btn{{end}}"
-                data-id="{{.ID}}"
-                data-action="dislike"
-                data-type="post"
-              >
-                <i class="fas fa-thumbs-down"></i>
-                <span id="dislike_post-{{.ID}}">{{.Dislikes}}</span>
-              </button>
-
-              <a class="action-btn" href="/Commenting?post_id={{.ID}}"
-                ><i class="fas fa-comment"></i>{{.NbComment}}</a
-              >
-            </div>
-          </div>
-          {{end}}
         </div>
         <div class="loading" id="loadingContainer">
           <div class="spinner"></div>

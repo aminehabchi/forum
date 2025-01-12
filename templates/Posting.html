@@ -1,53 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forum - Posting</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link rel="stylesheet" href="/static/post.css" />
-  </head>
 
-  <body>
-    <header class="head">
-      <a class="logo" href="/">Forum</a>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum - Posting</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="/static/post.css" />
+</head>
 
-    <div class="form-container">
-      <form class="myform" action="/Posting" method="post">
-        <h1>Create a New Post</h1>
-        {{if .Error}}
-        <span class="error">{{.Error}}</span>
+<body>
+  <header class="head">
+    <a class="logo" href="/">Forum</a>
+  </header>
+
+  <div class="form-container">
+    <form class="myform" action="/Posting" method="post" enctype="multipart/form-data">
+      <h1>Create a New Post</h1>
+      {{if .Error}}
+      <span class="error">{{.Error}}</span>
+      {{end}}
+      <input class="input" type="text" name="title" placeholder="Title" required />
+      <div class="categorie" style="display: flex; gap: 8px; margin-bottom: 8px">
+        {{range .Categories}}
+        <label>
+          <input type="checkbox" name="categories" value="{{.}}" />
+          {{.}}
+        </label>
         {{end}}
-        <input
-          class="input"
-          type="text"
-          name="title"
-          placeholder="Title"
-          required
-        />
-        <div
-          class="categorie"
-          style="display: flex; gap: 8px; margin-bottom: 8px"
-        >
-          {{range .Categories}}
-          <label>
-            <input type="checkbox" name="categories" value="{{.}}" />
-            {{.}}
-          </label>
-          {{end}}
-        </div>
+      </div>
 
-        <textarea
-          name="content"
-          placeholder="Write your content here..."
-          required
-        ></textarea>
-        <input class="input btn" type="submit" value="Post" />
-      </form>
-    </div>
-  </body>
+      <textarea name="content" placeholder="Write your content here..."></textarea>
+
+      <input type="file" id="file" name="file" accept="image/*">
+
+      <input class="input btn" type="submit" value="Post" />
+    </form>
+  </div>
+</body>
+
 </html>

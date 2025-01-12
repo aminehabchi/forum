@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	db            *sql.DB
-	allCategories = map[string]bool{
+	Db            *sql.DB
+	AllCategories = map[string]bool{
 		"general":       true,
 		"news":          true,
 		"entertainment": true,
@@ -40,10 +40,11 @@ const (
 	postsTable = `
     CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NULL UNIQUE,
-        content TEXT NULL UNIQUE,
+        title TEXT NOT NULL UNIQUE,
+        content TEXT,
         user_id INTEGER NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        img TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
     `
@@ -89,13 +90,13 @@ const (
 
 func CreateDB() error {
 	var err error
-	db, err = sql.Open("sqlite3", "./database.db")
+	Db, err = sql.Open("sqlite3", "./database.db")
 	if err != nil {
 		return err
 	}
 
 	// Enable foreign key constraints
-	if _, err = db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+	if _, err = Db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
 		return err
 	}
 
@@ -113,7 +114,7 @@ func CreateDB() error {
 	}
 
 	for _, table := range tables {
-		if _, err := db.Exec(table.schema); err != nil {
+		if _, err := Db.Exec(table.schema); err != nil {
 			return fmt.Errorf("failed to create %s table: %v", table.name, err)
 		}
 	}

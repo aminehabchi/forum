@@ -1,6 +1,7 @@
 package forum
 
 import (
+	Data "forum/funcs/database"
 	"net/http"
 )
 
@@ -34,7 +35,7 @@ func CheckIfCookieValid(w http.ResponseWriter, r *http.Request) (int, bool) {
 	var userId int
 	c, err := r.Cookie("Token")
 	if err == nil {
-		userId, err = GetUserIDFromToken(c.Value)
+		userId, err = Data.GetUserIDFromToken(c.Value)
 		if err != nil {
 			http.SetCookie(w, &http.Cookie{
 				Name:   "Token",
