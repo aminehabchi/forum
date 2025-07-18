@@ -4,7 +4,7 @@
 
 This project involves building a web forum application using Go, SQLite, and Docker. The forum will allow users to communicate through posts and comments, associate categories with posts, like and dislike content, and filter posts based on various criteria.  This project is designed as an educational exercise to reinforce understanding of web development fundamentals, database management, and containerization.
 
-##
+## Database diagram
 ![Alt text](./diagram.png)
 
 ## Project Purpose
